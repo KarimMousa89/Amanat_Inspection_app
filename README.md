@@ -1,0 +1,1 @@
+# Amanat_Inspection_app
