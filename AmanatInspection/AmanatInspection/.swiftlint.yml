@@ -1,0 +1,18 @@
+#disabled_rules:
+#    - contrasted_opening_brace
+#    - required_deinit
+#    - trailing_whitespace
+#    - empty_count # show error while checking on integer value not collection
+#    - explicit_acl #TODO:: Consider visibility level later on
+#    - explicit_top_level_acl
+#    - todo
+#    - line_length
+#    - explicit_type_interface
+    
+#opt_in_rules:
+#    - all
+    
+only_rules:
+    - force_unwrapping
+    
+force_unwrapping: error
