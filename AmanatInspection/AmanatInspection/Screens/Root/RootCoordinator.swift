@@ -65,10 +65,6 @@ final class RootCoordinator: Coordinator {
         resetToSplash()
     }
     
-    func handleJailbrokenDevice() {
-        rootScene = .jailbroken
-    }
-    
     func view() -> some View {
         print("RootCoordinator.view at \(Date()) \(String(describing: rootScene))") // Debug
         return RootCoordinatorView(rootScene: rootScene)
@@ -84,6 +80,10 @@ final class RootCoordinator: Coordinator {
         default:
             NSLog("KK:: Unknown URL action: \(String(describing: action))")
         }
+    }
+    
+    func handleJailbrokenDevice() {
+        rootScene = .jailbroken
     }
     
     func resetToSplash() {

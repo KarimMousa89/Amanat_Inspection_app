@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct AmanatInspectionApp: App {
-    private var coordinator = RootCoordinator()
+    private let coordinator = RootCoordinator()
     @UIApplicationDelegateAdaptor(AmanatInspectionAppDelegate.self) var appDelegate
   
     var body: some Scene {
@@ -30,7 +30,6 @@ class AmanatInspectionAppDelegate: NSObject, UIApplicationDelegate {
     var coordinator: RootCoordinator?
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         NSLog("KK:: application open url: \(url)")
-        
         if let components = componentsFor(url) {
             Task {
                 await coordinator?.handleURLComponents(components)

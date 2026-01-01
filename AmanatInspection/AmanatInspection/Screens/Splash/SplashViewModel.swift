@@ -29,7 +29,7 @@ final class SplashViewModelImpl: SplashViewModel {
         
         // Perform work on background thread
         _ = try await Task.detached {
-            // TODO:: load user data to check if loggedin
+            // TODO: - load user data to check if loggedin
             try await Task.sleep(nanoseconds: 1_000_000_000)
 //            print("Thread isMain: \(Thread.isMainThread)")
             return false

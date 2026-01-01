@@ -12,59 +12,63 @@ enum Language: String {
     case english = "en"
 }
 
-// TODO:: optimize, not all methods needs MainActor
+// TODO: - optimize, not all methods needs MainActor
 @MainActor
 final class LanguageManager {
     static let shared: LanguageManager = LanguageManager()
     
-    private let defaultAppLanguage: String  = Language.english.rawValue
-    private var currentLanguage: String? = nil
-    private var bundle: Bundle? = nil
-    
-    var appLanguage: String {
+    private let defaultAppLanguage: Language  = Language.english
+    private var bundle: Bundle = .main
+    private var currentLanguage: Language? = nil
+
+    var appLanguage: Language {
         set {
-            guard let path = Bundle.main.path(forResource: newValue, ofType: "lproj"),
+            guard let path = Bundle.main.path(forResource: newValue.rawValue, ofType: "lproj"),
                   let newBundle = Bundle(path: path) else {
                 return
             }
             bundle = newBundle
             currentLanguage = newValue
-            UserDefaults.standard.setValue(newValue, forKey: "appLanguage")
-            UserDefaults.standard.set([newValue], forKey: "AppleLanguages")
+            UserDefaults.standard.setValue(newValue.rawValue, forKey: "appLanguage")
+            UserDefaults.standard.set([newValue.rawValue], forKey: "AppleLanguages")
             UserDefaults.standard.synchronize()
         }
         get {
             if let currentLanguage {
                 return currentLanguage
-            } else {
+            } else { // app just opened
                 var lang: String = ""
                 let loadedLang = UserDefaults.standard.value(forKey: "appLanguage") as? String
                 if let loadedLang {
                     lang = loadedLang
                 } else { // first time launch
-                    // TODO:: read phone language, if it's one from the supported langs then use it otherwise use the default language
-                    lang = defaultAppLanguage
+                    // TODO: - read phone language, if it's one from the supported langs then use it otherwise use the default language
+                    lang = defaultAppLanguage.rawValue
                 }
-                if let path = Bundle.main.path(forResource: lang, ofType: "lproj"),
-                      let newBundle = Bundle(path: path) {
+                if let desiredLanguage = Language(rawValue: lang),
+                   let path = Bundle.main.path(forResource: lang, ofType: "lproj"),
+                   let newBundle = Bundle(path: path) {
                     bundle = newBundle
-                    currentLanguage = lang
+                    currentLanguage = desiredLanguage
                     if loadedLang == nil {
                         UserDefaults.standard.setValue(lang, forKey: "appLanguage")
                         UserDefaults.standard.set([lang], forKey: "AppleLanguages")
                         UserDefaults.standard.synchronize()
                     }
+                    if let currentLanguage {
+                        return currentLanguage
+                    }
                 }
-                return lang
+                return defaultAppLanguage
             }
         }
     }
+    // TODO: - take caching manager, don't use user defaults by default
+    init() {
+        
+    }
     
     func localizedString(_ key: String) -> String {
-        if bundle == nil {
-            bundle = .main
-        }
-        guard let bundle else { return key }
         return bundle.localizedString(forKey: key, value: nil, table: nil)
     }
 }

@@ -36,7 +36,7 @@ struct UserSelectionView: View {
                     }
                     
                     Button {
-                        // TODO:: check visitor path
+                        // TODO: - check visitor path
                     } label: {
                         Text("Visitor".localized)
                             .font(.buttonsFont)

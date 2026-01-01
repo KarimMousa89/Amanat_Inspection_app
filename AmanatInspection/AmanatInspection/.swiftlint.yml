@@ -3,7 +3,7 @@
 #    - required_deinit
 #    - trailing_whitespace
 #    - empty_count # show error while checking on integer value not collection
-#    - explicit_acl #TODO:: Consider visibility level later on
+#    - explicit_acl #TODO: - Consider visibility level later on
 #    - explicit_top_level_acl
 #    - todo
 #    - line_length
