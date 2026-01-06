@@ -12,7 +12,7 @@ enum AppRoute: Identifiable, Hashable {
     case jailbroken
     case splash(viewModel: SplashViewModelImpl)
     case login(coordinator: LoginCoordinator)
-    case home(coordinator: HomeCoordinator)
+//    case home(coordinator: HomeCoordinator)
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -26,7 +26,7 @@ enum AppRoute: Identifiable, Hashable {
         case .jailbroken: return "Jailbroken"
         case .splash: return "splash"
         case .login: return "login"
-        case .home: return "home"
+//        case .home: return "home"
         }
     }
 }
@@ -39,47 +39,53 @@ struct AppRouter {
             JailbrokenView()
         case .splash(viewModel: let viewModel):
             SplashView(viewModel: viewModel)
-        case .home(let coordinator):
-            coordinator.view()
+//        case .home(let coordinator):
+//            coordinator.view()
         case .login(let coordinator):
             coordinator.view()
         }
     }
 }
 
-//TODO: check main actor
 @MainActor
-final class RootCoordinator: Coordinator {
-    var onRootChange: ((AppRoute) -> Void)?
-    private var rootScene: AppRoute! {
-        willSet{
-            onRootChange?(newValue)
-        }
-    }
+protocol RootCoordinating: Coordinator {
+    var rootScene: AppRoute { get }
+    func handleURLComponents(_ components: URLComponents) async
+    func handleJailbrokenDevice()
+    func resetToSplash()
+    func resetToLogin()
+    func resetToHome()
+}
+
+//TODO: check main actor
+@MainActor @Observable
+final class RootCoordinator {
+    private(set) var rootScene: AppRoute = .jailbroken
     
-    private var homeCoordinator: HomeCoordinator?
+//    private var homeCoordinator: HomeCoordinator?
     private var loginCoordinator: LoginCoordinator?
     
     init() {
         print(">>> RootCoordinator.init at \(Date())")
         resetToSplash()
     }
-    
+}
+
+extension RootCoordinator: RootCoordinating {
     func view() -> some View {
         print("RootCoordinator.view at \(Date()) \(String(describing: rootScene))") // Debug
-        return RootCoordinatorView(rootScene: rootScene)
-            .environmentObject(self)
+        return RootCoordinatorView()
     }
     
     func handleURLComponents(_ components: URLComponents) async {
-        let action = components.host
-        switch action {
-        case "showUser":
-            NSLog("KK:: Home related action!")
-            await homeCoordinator?.handleURLComponents(components)
-        default:
-            NSLog("KK:: Unknown URL action: \(String(describing: action))")
-        }
+//        let action = components.host
+//        switch action {
+//        case "showUser":
+//            NSLog("KK:: Home related action!")
+//            await homeCoordinator?.handleURLComponents(components)
+//        default:
+//            NSLog("KK:: Unknown URL action: \(String(describing: action))")
+//        }
     }
     
     func handleJailbrokenDevice() {
@@ -87,7 +93,8 @@ final class RootCoordinator: Coordinator {
     }
     
     func resetToSplash() {
-        homeCoordinator = nil
+        NSLog("KK:: reset to splash")
+//        homeCoordinator = nil
         loginCoordinator = nil
         rootScene = .splash(viewModel: SplashViewModelImpl(onloadFinished: { userLoggedIn in
             if userLoggedIn {
@@ -99,7 +106,8 @@ final class RootCoordinator: Coordinator {
     }
     
     func resetToLogin() {
-        homeCoordinator = nil
+        NSLog("KK:: reset to login")
+//        homeCoordinator = nil
         loginCoordinator = LoginCoordinator {
             self.resetToHome()
         }
@@ -109,30 +117,21 @@ final class RootCoordinator: Coordinator {
     }
     
     func resetToHome() {
-        loginCoordinator = nil
-        homeCoordinator = HomeCoordinator {
-            self.resetToLogin()
-        }
-        if let homeCoordinator {
-            rootScene = .home(coordinator: homeCoordinator)
-        }
+        NSLog("KK:: reset to home")
+//        loginCoordinator = nil
+//        homeCoordinator = HomeCoordinator {
+//            self.resetToLogin()
+//        }
+//        if let homeCoordinator {
+//            rootScene = .home(coordinator: homeCoordinator)
+//        }
     }
 }
 
 struct RootCoordinatorView: View {
-    @EnvironmentObject var coordinator: RootCoordinator
-    @State var rootScene: AppRoute
-    
-    init(rootScene: AppRoute) {
-        self.rootScene = rootScene
-    }
+    @Environment(\.rootCoordinator) private var coordinator: any RootCoordinating
     
     var body: some View {
-        AppRouter.view(for: rootScene)
-            .onLoad {
-                coordinator.onRootChange = { newRoot in
-                    rootScene = newRoot
-                }
-            }
+        AppRouter.view(for: coordinator.rootScene)
     }
 }

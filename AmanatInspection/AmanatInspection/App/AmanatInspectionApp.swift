@@ -9,13 +9,14 @@ import SwiftUI
 
 @main
 struct AmanatInspectionApp: App {
-    private let coordinator = RootCoordinator()
+    @State private var coordinator = RootCoordinator()
     @UIApplicationDelegateAdaptor(AmanatInspectionAppDelegate.self) var appDelegate
   
     var body: some Scene {
         WindowGroup {
             coordinator
                 .view()
+                .environment(\.rootCoordinator, coordinator)
         }
     }
     

@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 @MainActor
-protocol Coordinator: ObservableObject {
+protocol Coordinator {
     associatedtype ViewType: View
     func view() -> ViewType
 }
