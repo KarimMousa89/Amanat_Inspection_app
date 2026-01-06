@@ -10,7 +10,7 @@ import SwiftUI
 
 enum AppRoute: Identifiable, Hashable {
     case jailbroken
-    case splash(viewModel: SplashViewModelImpl)
+    case splash(makeViewModel: () -> SplashViewModelImpl)
     case login(coordinator: LoginCoordinator)
 //    case home(coordinator: HomeCoordinator)
     
@@ -37,8 +37,8 @@ struct AppRouter {
         switch route {
         case .jailbroken:
             JailbrokenView()
-        case .splash(viewModel: let viewModel):
-            SplashView(viewModel: viewModel)
+        case .splash(let makeViewModel):
+            SplashView(makeViewModel: makeViewModel)
 //        case .home(let coordinator):
 //            coordinator.view()
         case .login(let coordinator):
@@ -96,13 +96,7 @@ extension RootCoordinator: RootCoordinating {
         NSLog("KK:: reset to splash")
 //        homeCoordinator = nil
         loginCoordinator = nil
-        rootScene = .splash(viewModel: SplashViewModelImpl(onloadFinished: { userLoggedIn in
-            if userLoggedIn {
-                self.resetToHome()
-            } else {
-                self.resetToLogin()
-            }
-        }))
+        rootScene = .splash(makeViewModel: { SplashViewModelImpl(navigator: self) })
     }
     
     func resetToLogin() {
@@ -125,6 +119,12 @@ extension RootCoordinator: RootCoordinating {
 //        if let homeCoordinator {
 //            rootScene = .home(coordinator: homeCoordinator)
 //        }
+    }
+}
+
+extension RootCoordinator: SplashNavigating {
+    func splashDidFinish(loggedIn: Bool) {
+        loggedIn ? resetToHome() : resetToLogin()
     }
 }
 

@@ -8,18 +8,23 @@
 import Foundation
 
 @MainActor
-protocol SplashViewModel: ObservableObject {
-    var onloadFinished: ((Bool) -> Void) { get }
+protocol SplashNavigating {
+    func splashDidFinish(loggedIn: Bool)
+}
+
+@MainActor
+protocol SplashViewModel {
+    var navigator: SplashNavigating { get }
     func load() async throws
 }
 
 @MainActor @Observable
 final class SplashViewModelImpl: SplashViewModel {
-    var onloadFinished: ((Bool) -> Void)
+    let navigator: SplashNavigating
     let dataProcessor = DataProcessor()
     
-    init(onloadFinished: @escaping (Bool) -> Void) {
-        self.onloadFinished = onloadFinished
+    init (navigator: SplashNavigating) {
+        self.navigator = navigator
     }
     
     func load() async throws {
@@ -36,7 +41,7 @@ final class SplashViewModelImpl: SplashViewModel {
         }.value
         
         // back to Main thread
-        onloadFinished(false)
+        navigator.splashDidFinish(loggedIn: false)
     }
 }
 

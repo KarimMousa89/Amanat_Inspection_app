@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct SplashView<ViewModel: SplashViewModel>: View {
-    @StateObject var viewModel: ViewModel
+    @State var viewModel: ViewModel
+    
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
+    }
     
     var body: some View {
         SplashContentView()
@@ -61,16 +65,3 @@ struct SplashContentView: View {
         }
     }
 }
-
-#Preview {
-    let model = MockSplashViewModel{_ in }
-    SplashView(viewModel: model)
-}
-class MockSplashViewModel: SplashViewModel {
-    var onloadFinished: (Bool) -> Void
-    init(onloadFinished: @escaping (Bool) -> Void) {
-        self.onloadFinished = onloadFinished
-    }
-    func load() async throws {}
-}
-
