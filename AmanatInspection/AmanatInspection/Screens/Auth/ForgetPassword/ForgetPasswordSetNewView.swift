@@ -7,14 +7,13 @@
 
 import SwiftUI
 
-struct ForgetPasswordSetNewView: View {
-    @EnvironmentObject var loginHandler: LoginSuccessHandler
-    @EnvironmentObject var coordinator: LoginCoordinator
+struct ForgetPasswordSetNewView<ViewModel: ForgetPasswordSetNewViewModelImpl>: View {
+    @Environment(\.loginNavigator) var loginHandler: any LoginNavigating
     
-    @StateObject var viewModel: ForgetPasswordSetNewViewModelImpl
+    @State var viewModel: ViewModel
     
-    init(viewModel: ForgetPasswordSetNewViewModelImpl) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
     }
     
     var body: some View {
@@ -26,20 +25,23 @@ struct ForgetPasswordSetNewView: View {
             }
             
             Button("Verify Code & Set New Worng Password") {
-                viewModel.process(verificationCode: "123456", newPassword: "123453", confirmPassword: "123456") {
-                    
+                Task {
+                    await viewModel.process(verificationCode: "123456", newPassword: "123453", confirmPassword: "123456")
                 }
             }
 
             Button("Verify Code & Set New Correct Password") {
-                viewModel.process(verificationCode: "123456", newPassword: "654321", confirmPassword: "654321") {
-                    coordinator.popLast(2)
+                Task {
+                    guard await viewModel.process(verificationCode: "123456", newPassword: "654321", confirmPassword: "654321") else { return }
                 }
             }
             
             Button("Simulate Login") {
-//                loginHandler.onLoginSuccess?()
+                viewModel.simulateLogin()
             }
+        }
+        .onLoad {
+            viewModel.loginHandler = self.loginHandler
         }
     }
 }

@@ -8,13 +8,12 @@
 import SwiftUI
 
 struct LoginView<ViewModel: LoginViewModel>: View {
-    @EnvironmentObject var coordinator: LoginCoordinator
-    @EnvironmentObject var loginHandler: LoginSuccessHandler
+    @Environment(\.loginNavigator) var loginHandler: any LoginNavigating
     
-    @StateObject var viewModel: ViewModel
+    @State var viewModel: ViewModel
     
-    init(viewModel: ViewModel) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
     }
     
     var body: some View {
@@ -81,7 +80,7 @@ struct LoginView<ViewModel: LoginViewModel>: View {
                             
                             HStack{
                                 Button {
-                                    coordinator.push(.forgetPasswordPath(.emailVerification(viewModel: ForgetPasswordEmailViewModelImpl())))
+                                    viewModel.forgetPassword()
                                 } label: {
                                     Text("Forget_Password?")
                                         .font(.bodyFont)
@@ -129,7 +128,7 @@ struct LoginView<ViewModel: LoginViewModel>: View {
                             
                             Button {
                                 Task{
-                                    await viewModel.login(onLoginSuccess: loginHandler.onLoginSuccess)
+                                    await viewModel.login(handler: loginHandler)
                                 }
                             } label: {
                                 ZStack {
@@ -168,7 +167,9 @@ struct LoginView<ViewModel: LoginViewModel>: View {
 
 #Preview {
     let model = LoginViewModelImpl()
-    LoginView(viewModel: model)
+    LoginView {
+        model
+    }
 }
 
 struct FloatingTextFieldWithError : View {

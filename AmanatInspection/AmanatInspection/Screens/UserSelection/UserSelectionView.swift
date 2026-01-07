@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct UserSelectionView: View {
-    @EnvironmentObject var coordinator: LoginCoordinator
+    @Environment(\.loginCoordinator) var coordinator
     
     var body: some View {
         ZStack {
@@ -24,7 +24,9 @@ struct UserSelectionView: View {
                     Spacer()
                         .frame(height: topSpace)
                     Button {
-                        coordinator.push(.login(viewModel: LoginViewModelImpl()))
+                        coordinator.resetToNewRoot(.login(makeViewModel: {
+                            LoginViewModelImpl(coordinator: coordinator)
+                        }))
                     } label: {
                         Text("User".localized)
                             .font(.buttonsFont)

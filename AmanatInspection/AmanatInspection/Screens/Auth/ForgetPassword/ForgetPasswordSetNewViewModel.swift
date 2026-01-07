@@ -6,24 +6,37 @@
 //
 
 import Foundation
-import SwiftUI
 
-protocol ForgetPasswordSetNewViewModel: ObservableObject {
+protocol ForgetPasswordSetNewViewModel {
+    var loginHandler: (any LoginNavigating)? { get set }
+    var coordinator: AnyLoginCoordinator? { get set }
     var errorMessage: String? { get set}
-    func process(verificationCode: String, newPassword: String, confirmPassword: String, onPasswordSet: (() -> Void))
+    func process(verificationCode: String, newPassword: String, confirmPassword: String) async -> Bool
+    func simulateLogin()
 }
 
-@Observable
-class ForgetPasswordSetNewViewModelImpl: ForgetPasswordSetNewViewModel {
-
+@MainActor @Observable
+class ForgetPasswordSetNewViewModelImpl: @MainActor ForgetPasswordSetNewViewModel {
+    var loginHandler: (any LoginNavigating)?
+    
+    var coordinator: AnyLoginCoordinator?
+    
     var errorMessage: String?
     
-    func process(verificationCode: String, newPassword: String, confirmPassword: String, onPasswordSet: (() -> Void)) {
+    init(coordinator: AnyLoginCoordinator? = nil) {
+        self.coordinator = coordinator
+    }
+    
+    func process(verificationCode: String, newPassword: String, confirmPassword: String) async -> Bool {
         if newPassword != confirmPassword {
             errorMessage = "Passwords do not match"
-            return
+            return false
         }
-        
-        onPasswordSet()
+        coordinator?.popToRoot()
+        return true
+    }
+    
+    func simulateLogin() {
+        loginHandler?.loginDidSuccess()
     }
 }

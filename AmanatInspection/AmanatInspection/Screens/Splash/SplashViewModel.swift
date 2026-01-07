@@ -7,7 +7,6 @@
 
 import Foundation
 
-@MainActor
 protocol SplashNavigating {
     func splashDidFinish(loggedIn: Bool)
 }

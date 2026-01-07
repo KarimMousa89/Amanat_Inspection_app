@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 enum ForgetPasswordRoute: Identifiable, Hashable {
-    case emailVerification(viewModel: ForgetPasswordEmailViewModelImpl)
-    case setNew(viewModel: ForgetPasswordSetNewViewModelImpl)
+    case emailVerification(makeViewModel: () -> ForgetPasswordEmailViewModelImpl)
+    case setNew(makeViewModel: () -> ForgetPasswordSetNewViewModelImpl)
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -28,7 +28,7 @@ enum ForgetPasswordRoute: Identifiable, Hashable {
 
 enum LoginRoute: Identifiable, Hashable {
     case userSelection
-    case login(viewModel: LoginViewModelImpl)
+    case login(makeViewModel: () -> LoginViewModelImpl)
     case forgetPasswordPath(_ route:ForgetPasswordRoute)
     case signup
     
@@ -54,14 +54,14 @@ struct LoginRouter {
         switch route {
         case .userSelection:
             UserSelectionView()
-        case .login(viewModel: let viewModel):
-            LoginView(viewModel: viewModel)
+        case .login(let makeViewModel):
+            LoginView(makeViewModel: makeViewModel)
         case .forgetPasswordPath(let forgetPasswordRoute):
             switch forgetPasswordRoute {
-            case .emailVerification(viewModel: let viewModel):
-                ForgetPasswordEmailView(viewModel: viewModel)
-            case .setNew(viewModel: let viewModel):
-                ForgetPasswordSetNewView(viewModel: viewModel)
+            case .emailVerification(let makeViewModel):
+                ForgetPasswordEmailView(makeViewModel: makeViewModel)
+            case .setNew(let makeViewModel):
+                ForgetPasswordSetNewView(makeViewModel: makeViewModel)
             }
         case .signup:
             Text("Signup")
@@ -69,47 +69,107 @@ struct LoginRouter {
     }
 }
 
-//@MainActor
-final class LoginSuccessHandler: ObservableObject {
-    var onLoginSuccess: (() -> Void)?
+protocol LoginNavigating {
+    func loginDidSuccess()
 }
 
-@MainActor
-class LoginCoordinator: Coordinator, NavigationCoordinator, ModalCoordinator {
-    private var loginSuccessHandler = LoginSuccessHandler()
-    init(onloginSuccess: @escaping (() -> Void)) {
-        loginSuccessHandler.onLoginSuccess = onloginSuccess
-    }
+@MainActor @Observable
+class LoginCoordinator {
+    typealias Route = LoginRoute
+    var navPath: [Route] = []
+    var modalScene: Route? = nil
     
-    var onPathChange: ((NavigationPath) -> Void)?
-    var navPath = NavigationPath() {
-        didSet {
-            onPathChange?(navPath)
-        }
+    private var navigator: LoginNavigating
+    init(navigator: LoginNavigating) {
+        self.navigator = navigator
     }
-    
-    var onModalChange: ((LoginRoute?) -> Void)?
-    var modalScene: LoginRoute?{
-        didSet {
-            onModalChange?(modalScene)
-        }
-    }
-    
+}
+
+typealias LoginCoordinating = Coordinator&NavigationCoordinator&ModalCoordinator
+
+extension LoginCoordinator: LoginCoordinating {
     func view() -> some View {
         print("LoginCoordinator.view")
         return LoginCoordinatorView()
-            .environmentObject(self)
-            .environmentObject(loginSuccessHandler)
+            .environment(\.loginCoordinator, AnyLoginCoordinator(self))
+            .environment(\.loginNavigator, navigator)
+    }
+}
+@MainActor @Observable
+final class AnyLoginCoordinator: LoginCoordinating {
+    // This is the concrete type the View will bind to.
+    // It is NOT generic.
+    
+    // 1. The internal, type-erased storage box.
+    @MainActor
+    private class AnyCoordinatorBox {
+        // We define the properties and methods we need to access.
+        // These are abstract and will be implemented by a generic subclass.
+        var navPath: [LoginRoute] { get { fatalError() } set { fatalError() } }
+        var modalScene: LoginRoute? { get { fatalError() } set { fatalError() } }
+        func view() -> AnyView { fatalError() }
+    }
+
+    // 2. A generic subclass of the box that captures the concrete coordinator type.
+    // This class is ALSO private to the wrapper.
+    @MainActor
+    private class CoordinatorBox<C: LoginCoordinating>: AnyCoordinatorBox where C.Route == LoginRoute {
+        private let wrapped: C // Holds the REAL coordinator (e.g., LoginCoordinator or MockLoginCoordinator)
+
+        init(_ coordinator: C) {
+            self.wrapped = coordinator
+        }
+
+        // Implement the abstract properties by forwarding to the wrapped coordinator.
+        override var navPath: [LoginRoute] {
+            get { wrapped.navPath }
+            set { wrapped.navPath = newValue }
+        }
+
+        override var modalScene: LoginRoute? {
+            get { wrapped.modalScene }
+            set { wrapped.modalScene = newValue }
+        }
+
+        override func view() -> AnyView {
+            // Here is the single, justified use of AnyView.
+            // It's used to erase the ViewType of the wrapped coordinator.
+            return AnyView(wrapped.view())
+        }
+    }
+
+    // 3. The AnyLoginCoordinator holds an instance of the base box.
+    private let box: AnyCoordinatorBox
+
+    // 4. The public initializer takes ANY coordinator and puts it in the correct generic box.
+    init<C: LoginCoordinating>(_ coordinator: C) where C.Route == LoginRoute {
+        self.box = CoordinatorBox(coordinator)
+    }
+
+    // 5. Public properties and methods forward calls to the box.
+    // These are what the View will bind to.
+    var navPath: [LoginRoute] {
+        get { box.navPath }
+        set { box.navPath = newValue }
+    }
+
+    var modalScene: LoginRoute? {
+        get { box.modalScene }
+        set { box.modalScene = newValue }
+    }
+
+    func view() -> some View {
+        // The view method also forwards to the box.
+        box.view()
     }
 }
 
 struct LoginCoordinatorView: View {
-    @EnvironmentObject var coordinator: LoginCoordinator
-    @State private var navPath = NavigationPath() // Local state
-    @State private var modalScene: LoginRoute?
+    @Environment(\.loginCoordinator) private var coordinator
     
     var body: some View {
-        NavigationStack(path: $navPath) {
+        @Bindable var coordinator = coordinator
+        NavigationStack(path: $coordinator.navPath) {
             LoginRouter.view(for: .userSelection)
                 .navigationDestination(for: LoginRoute.self) { route in
                     LoginRouter.view(for: route)
@@ -128,17 +188,8 @@ struct LoginCoordinatorView: View {
                     //                        }
                 }
         }
-        .sheet(item: $modalScene) { modal in
+        .sheet(item: $coordinator.modalScene) { modal in
             LoginRouter.view(for: modal)
-        }
-        .onLoad {
-            coordinator.onPathChange = { newPath in
-                navPath = newPath
-            }
-            
-            coordinator.onModalChange = { modal in
-                modalScene = modal
-            }
         }
     }
 }

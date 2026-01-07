@@ -102,9 +102,7 @@ extension RootCoordinator: RootCoordinating {
     func resetToLogin() {
         NSLog("KK:: reset to login")
 //        homeCoordinator = nil
-        loginCoordinator = LoginCoordinator {
-            self.resetToHome()
-        }
+        loginCoordinator = LoginCoordinator(navigator: self)
         if let loginCoordinator {
             rootScene = .login(coordinator: loginCoordinator)
         }
@@ -122,14 +120,20 @@ extension RootCoordinator: RootCoordinating {
     }
 }
 
-extension RootCoordinator: SplashNavigating {
+extension RootCoordinator: @MainActor SplashNavigating {
     func splashDidFinish(loggedIn: Bool) {
         loggedIn ? resetToHome() : resetToLogin()
     }
 }
 
+extension RootCoordinator: @MainActor LoginNavigating {
+    func loginDidSuccess() {
+        resetToHome()
+    }
+}
+
 struct RootCoordinatorView: View {
-    @Environment(\.rootCoordinator) private var coordinator: any RootCoordinating
+    @Environment(\.rootCoordinator) private var coordinator
     
     var body: some View {
         AppRouter.view(for: coordinator.rootScene)

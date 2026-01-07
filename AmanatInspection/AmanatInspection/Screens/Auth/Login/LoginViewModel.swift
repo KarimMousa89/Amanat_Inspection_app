@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import SwiftUI
 
 @MainActor
-protocol LoginViewModel: ObservableObject {
+protocol LoginViewModel {
+    var coordinator: AnyLoginCoordinator? { get set }
     var userName: String { get set }
     var password: String { get set }
     var displayedCaptcha: String  { get set }
@@ -20,11 +20,14 @@ protocol LoginViewModel: ObservableObject {
     var loginErrorMessage: String? { get set }
     
     func regenerateCaptcha()
-    func login(onLoginSuccess: (() -> Void)?) async
+    func forgetPassword()
+    func login(handler: any LoginNavigating) async
 }
 
 @MainActor @Observable
 class LoginViewModelImpl: LoginViewModel {
+    var coordinator: AnyLoginCoordinator? = nil
+    
     var userName: String = ""
     var password: String = ""
     var displayedCaptcha: String = ""
@@ -36,7 +39,8 @@ class LoginViewModelImpl: LoginViewModel {
     
     var loginErrorMessage: String?
 
-    init () {
+    init (coordinator: AnyLoginCoordinator? = nil) {
+        self.coordinator = coordinator
         regenerateCaptcha()
     }
     
@@ -44,7 +48,14 @@ class LoginViewModelImpl: LoginViewModel {
         displayedCaptcha = randomString(length: 5)
     }
     
-    func login(onLoginSuccess: (() -> Void)?) async {
-         onLoginSuccess?()
+    func login(handler: any LoginNavigating) {
+        //        loginErrorMessage = "7Mada"
+        handler.loginDidSuccess()
+    }
+    
+    func forgetPassword() {
+        coordinator?.push(.forgetPasswordPath(.emailVerification(makeViewModel: {
+            ForgetPasswordEmailViewModelImpl(coordinator: self.coordinator)
+        })))
     }
 }

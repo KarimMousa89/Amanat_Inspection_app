@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+// MARK: - AppSettingsEnvironmentKey
 extension EnvironmentValues {
     @MainActor var appSettings: MyAppSettings {
         get { MyAppSettings() }
@@ -24,4 +25,32 @@ extension EnvironmentValues {
         get { self[RootCoordinatorKey.self] }
         set { self[RootCoordinatorKey.self] = newValue }
     }
+}
+
+// MARK: - LoginCoordinatorEnvironmentKey
+private struct LoginCoordinatorKey: @MainActor EnvironmentKey {
+    @MainActor static let defaultValue: AnyLoginCoordinator = AnyLoginCoordinator(LoginCoordinator(navigator: TempLoginNavigator()))
+}
+
+extension EnvironmentValues {
+    @MainActor var loginCoordinator: AnyLoginCoordinator {
+        get { self[LoginCoordinatorKey.self] }
+        set { self[LoginCoordinatorKey.self] = newValue }
+    }
+}
+
+// MARK: - LoginCoordinatorEnvironmentKey
+private struct LoginNavigatorKey: @MainActor EnvironmentKey {
+    @MainActor static let defaultValue: any LoginNavigating = TempLoginNavigator()
+}
+
+extension EnvironmentValues {
+    @MainActor var loginNavigator: any LoginNavigating {
+        get { self[LoginNavigatorKey.self] }
+        set { self[LoginNavigatorKey.self] = newValue }
+    }
+}
+
+final class TempLoginNavigator: LoginNavigating {
+    func loginDidSuccess() {}
 }

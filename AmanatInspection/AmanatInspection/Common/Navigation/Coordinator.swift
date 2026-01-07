@@ -9,25 +9,20 @@ import Foundation
 import SwiftUI
 
 @MainActor
-protocol Coordinator {
+protocol Coordinator: AnyObject {
     associatedtype ViewType: View
     func view() -> ViewType
 }
 
 @MainActor
-protocol NavigationCoordinator: ObservableObject {
+protocol NavigationCoordinator: AnyObject {
     associatedtype Route: Hashable
-    var navPath: NavigationPath { get set }
+    var navPath: [Route] { get set }
     func push(_ destination: Route)
     func pop()
     func popLast(_ count: Int)
     func popToRoot()
     func resetToNewRoot(_ destination: Route)
-    
-    // TODO: define ModalCoordinator as decorator for the coordinator, so we add presentation cabability for any navigation stack or tab view
-    var modalScene: Route? { get set }
-    func presentModal(_ scene: Route)
-    func dismissModal()
 }
 
 extension NavigationCoordinator {
@@ -54,16 +49,15 @@ extension NavigationCoordinator {
     }
     
     func resetToNewRoot(_ destination: Route) {
-        navPath = NavigationPath([destination])
+        navPath = [destination]
     }
 }
 
-
 @MainActor
-protocol ModalCoordinator: ObservableObject {
+protocol ModalCoordinator: AnyObject{
     associatedtype Route: Hashable
     // TODO: define ModalCoordinator as decorator for the coordinator, so we add presentation cabability for any navigation stack or tab view
-    var modalScene: Route? { get set }
+    var modalScene: Route? { get set}
     func presentModal(_ scene: Route)
     func dismissModal()
 }
@@ -71,11 +65,11 @@ protocol ModalCoordinator: ObservableObject {
 extension ModalCoordinator {
     func presentModal(_ scene: Route) {
         print("presentModal \(scene)")
-        self.modalScene = scene
+        modalScene = scene
     }
     
     func dismissModal() {
         print("dismissModal")
-        self.modalScene = nil
+        modalScene = nil
     }
 }

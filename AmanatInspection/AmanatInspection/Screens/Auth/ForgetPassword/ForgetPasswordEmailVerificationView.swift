@@ -7,14 +7,13 @@
 
 import SwiftUI
 
-struct ForgetPasswordEmailView: View {
-    @EnvironmentObject var coordinator: LoginCoordinator
-    @StateObject var viewModel: ForgetPasswordEmailViewModelImpl
-    
+struct ForgetPasswordEmailView<ViewModel: ForgetPasswordEmailViewModel>: View {
     @State private var code: String = ""
     
-    init(viewModel: ForgetPasswordEmailViewModelImpl) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    @State var viewModel: ViewModel
+    
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
     }
     
     var body: some View {
@@ -22,8 +21,9 @@ struct ForgetPasswordEmailView: View {
             Text("Forget Password Email View")
             
             Button("Verify Email") {
-                viewModel.verify(email: "x.y@z.com") {
-                    coordinator.push(.forgetPasswordPath(.setNew(viewModel: ForgetPasswordSetNewViewModelImpl())))
+                Task {
+                    guard await viewModel.verify(email: "x.y@z.com")  else { return }
+      
                 }
             }
         }
