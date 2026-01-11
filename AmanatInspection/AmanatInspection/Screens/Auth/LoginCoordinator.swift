@@ -95,8 +95,10 @@ extension LoginCoordinator: LoginCoordinating {
             .environment(\.loginNavigator, navigator)
     }
 }
+
 @MainActor @Observable
 final class AnyLoginCoordinator: LoginCoordinating {
+    
     // This is the concrete type the View will bind to.
     // It is NOT generic.
     
@@ -111,7 +113,6 @@ final class AnyLoginCoordinator: LoginCoordinating {
     }
 
     // 2. A generic subclass of the box that captures the concrete coordinator type.
-    // This class is ALSO private to the wrapper.
     @MainActor
     private class CoordinatorBox<C: LoginCoordinating>: AnyCoordinatorBox where C.Route == LoginRoute {
         private let wrapped: C // Holds the REAL coordinator (e.g., LoginCoordinator or MockLoginCoordinator)
@@ -120,7 +121,6 @@ final class AnyLoginCoordinator: LoginCoordinating {
             self.wrapped = coordinator
         }
 
-        // Implement the abstract properties by forwarding to the wrapped coordinator.
         override var navPath: [LoginRoute] {
             get { wrapped.navPath }
             set { wrapped.navPath = newValue }
@@ -138,16 +138,12 @@ final class AnyLoginCoordinator: LoginCoordinating {
         }
     }
 
-    // 3. The AnyLoginCoordinator holds an instance of the base box.
     private let box: AnyCoordinatorBox
 
-    // 4. The public initializer takes ANY coordinator and puts it in the correct generic box.
     init<C: LoginCoordinating>(_ coordinator: C) where C.Route == LoginRoute {
         self.box = CoordinatorBox(coordinator)
     }
 
-    // 5. Public properties and methods forward calls to the box.
-    // These are what the View will bind to.
     var navPath: [LoginRoute] {
         get { box.navPath }
         set { box.navPath = newValue }
@@ -159,7 +155,6 @@ final class AnyLoginCoordinator: LoginCoordinating {
     }
 
     func view() -> some View {
-        // The view method also forwards to the box.
         box.view()
     }
 }

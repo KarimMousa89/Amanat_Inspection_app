@@ -9,13 +9,18 @@ import Foundation
 import SwiftUI
 
 @MainActor
+protocol URLComponentsHandler: AnyObject {
+    func handleURLComponents(_ components: URLComponents) async
+}
+
+@MainActor
 protocol Coordinator: AnyObject {
     associatedtype ViewType: View
     func view() -> ViewType
 }
 
 @MainActor
-protocol NavigationCoordinator: AnyObject {
+protocol NavigationCoordinator: Coordinator {
     associatedtype Route: Hashable
     var navPath: [Route] { get set }
     func push(_ destination: Route)
@@ -54,7 +59,7 @@ extension NavigationCoordinator {
 }
 
 @MainActor
-protocol ModalCoordinator: AnyObject{
+protocol ModalCoordinator: Coordinator{
     associatedtype Route: Hashable
     // TODO: define ModalCoordinator as decorator for the coordinator, so we add presentation cabability for any navigation stack or tab view
     var modalScene: Route? { get set}

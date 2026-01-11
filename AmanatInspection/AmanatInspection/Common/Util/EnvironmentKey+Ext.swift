@@ -17,7 +17,7 @@ extension EnvironmentValues {
 
 // MARK: - RootCoordinatorEnvironmentKey
 private struct RootCoordinatorKey: @MainActor EnvironmentKey {
-    @MainActor static let defaultValue: any RootCoordinating = RootCoordinator()
+    @MainActor static let defaultValue: any RootCoordinating = AppRootCoordinatorImp()
 }
 
 extension EnvironmentValues {
@@ -39,7 +39,7 @@ extension EnvironmentValues {
     }
 }
 
-// MARK: - LoginCoordinatorEnvironmentKey
+// MARK: - LoginNavigatingCoordinatorEnvironmentKey
 private struct LoginNavigatorKey: @MainActor EnvironmentKey {
     @MainActor static let defaultValue: any LoginNavigating = TempLoginNavigator()
 }
@@ -54,3 +54,45 @@ extension EnvironmentValues {
 final class TempLoginNavigator: LoginNavigating {
     func loginDidSuccess() {}
 }
+
+// MARK: - HomeCoordinatorEnvironmentKey
+private struct HomeCoordinatorKey: @MainActor EnvironmentKey {
+    @MainActor static let defaultValue: AnyHomeCoordinator = AnyHomeCoordinator(HomeCoordinator(navigator: TempHomeNavigator()))
+}
+
+extension EnvironmentValues {
+    @MainActor var homeCoordinator: AnyHomeCoordinator {
+        get { self[HomeCoordinatorKey.self] }
+        set { self[HomeCoordinatorKey.self] = newValue }
+    }
+}
+
+// MARK: - HomeNavigatingCoordinatorEnvironmentKey
+private struct HomeNavigatorKey: @MainActor EnvironmentKey {
+    @MainActor static let defaultValue: any HomeNavigating = TempHomeNavigator()
+}
+
+extension EnvironmentValues {
+    @MainActor var homeNavigator: any HomeNavigating {
+        get { self[HomeNavigatorKey.self] }
+        set { self[HomeNavigatorKey.self] = newValue }
+    }
+}
+
+final class TempHomeNavigator: HomeNavigating {
+    func logoutDidSuccess() {}
+}
+
+// MARK: - FirstTabCoordinatorEnvironmentKey
+private struct FirstTabCoordinatorKey: @MainActor EnvironmentKey {
+    @MainActor static let defaultValue: any FirstTabCoordinating = FirstTabCoordinator()
+}
+
+extension EnvironmentValues {
+    @MainActor var FirstTabCoordinator: any FirstTabCoordinating {
+        get { self[FirstTabCoordinatorKey.self] }
+        set { self[FirstTabCoordinatorKey.self] = newValue }
+    }
+}
+
+
