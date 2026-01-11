@@ -101,6 +101,7 @@ extension AppRootCoordinatorImp: RootCoordinating {
     func view() -> some View {
         print("RootCoordinator.view at \(Date()) \(String(describing: rootScene))") // Debug
         return RootCoordinatorView()
+            .environment(\.rootCoordinator, self)
     }
     
     func handleURLComponents(_ components: URLComponents) async {

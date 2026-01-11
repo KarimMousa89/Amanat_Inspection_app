@@ -9,7 +9,7 @@ import Foundation
 
 protocol ForgetPasswordSetNewViewModel {
     var loginHandler: (any LoginNavigating)? { get set }
-    var coordinator: AnyLoginCoordinator? { get set }
+    var coordinator: AnyNavigationModalCoordinator<LoginRoute>? { get set }
     var errorMessage: String? { get set}
     func process(verificationCode: String, newPassword: String, confirmPassword: String) async -> Bool
     func simulateLogin()
@@ -19,11 +19,11 @@ protocol ForgetPasswordSetNewViewModel {
 class ForgetPasswordSetNewViewModelImpl: @MainActor ForgetPasswordSetNewViewModel {
     var loginHandler: (any LoginNavigating)?
     
-    var coordinator: AnyLoginCoordinator?
+    var coordinator: AnyNavigationModalCoordinator<LoginRoute>?
     
     var errorMessage: String?
     
-    init(coordinator: AnyLoginCoordinator? = nil) {
+    init(coordinator: AnyNavigationModalCoordinator<LoginRoute>? = nil) {
         self.coordinator = coordinator
     }
     

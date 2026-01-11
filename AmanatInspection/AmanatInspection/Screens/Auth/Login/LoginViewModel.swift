@@ -9,7 +9,7 @@ import Foundation
 
 @MainActor
 protocol LoginViewModel {
-    var coordinator: AnyLoginCoordinator? { get set }
+    var coordinator: AnyNavigationModalCoordinator<LoginRoute>? { get set }
     var userName: String { get set }
     var password: String { get set }
     var displayedCaptcha: String  { get set }
@@ -26,7 +26,7 @@ protocol LoginViewModel {
 
 @MainActor @Observable
 class LoginViewModelImpl: LoginViewModel {
-    var coordinator: AnyLoginCoordinator? = nil
+    var coordinator: AnyNavigationModalCoordinator<LoginRoute>? = nil
     
     var userName: String = ""
     var password: String = ""
@@ -39,7 +39,7 @@ class LoginViewModelImpl: LoginViewModel {
     
     var loginErrorMessage: String?
 
-    init (coordinator: AnyLoginCoordinator? = nil) {
+    init (coordinator: AnyNavigationModalCoordinator<LoginRoute>? = nil) {
         self.coordinator = coordinator
         regenerateCaptcha()
     }

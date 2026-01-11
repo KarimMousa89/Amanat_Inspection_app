@@ -10,7 +10,7 @@ import SwiftUI
 //Users list & Add new Book
 struct FirstTabView<ViewModel: FirstTabViewModel>: View {
     @StateObject var viewModel: ViewModel
-    @Environment(\.FirstTabCoordinator) var coordinator
+    @Environment(\.firstTabCoordinator) var coordinator
     
     @State private var tabBarHidden: Bool = false// TODO: move to the navigation coordinator
     
@@ -24,28 +24,28 @@ struct FirstTabView<ViewModel: FirstTabViewModel>: View {
                             ForEach(viewModel.books[key] ?? []) { book in
                                 HStack {
                                     Button("Push \(book.title)") {
-//                                        coordinator.push(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
-//                                            print("Push onDismiss")
-//                                            coordinator.pop()
-//                                        })))
+                                        coordinator.push(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
+                                            print("Push onDismiss")
+                                            coordinator.pop()
+                                        })))
                                     }
                                     .buttonStyle(.plain)
                                     Spacer()
                                     Button("Present \(book.title)") {
-//                                        coordinator.presentModal(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
-//                                            print("presentModal onDismiss")
-//                                            coordinator.dismissModal()
-//                                        })))
+                                        coordinator.presentModal(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
+                                            print("presentModal onDismiss")
+                                            coordinator.dismissModal()
+                                        })))
                                     }
                                     .buttonStyle(.plain)
                                     Spacer()
                                     Button("PushFull \(book.title)") {
                                         print("tabBarHidden = true")
                                         tabBarHidden = true
-//                                        coordinator.push(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
-//                                            print("PushFull onDismiss")
-//                                            coordinator.pop()
-//                                        })))
+                                        coordinator.push(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
+                                            print("PushFull onDismiss")
+                                            coordinator.pop()
+                                        })))
                                     }
                                     .buttonStyle(.plain)
                                 }

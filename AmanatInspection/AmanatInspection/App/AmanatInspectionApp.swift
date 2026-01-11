@@ -16,7 +16,6 @@ struct AmanatInspectionApp: App {
         WindowGroup {
             coordinator
                 .view()
-                .environment(\.rootCoordinator, coordinator)
         }
     }
     

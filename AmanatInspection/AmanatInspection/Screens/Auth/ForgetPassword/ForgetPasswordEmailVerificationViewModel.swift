@@ -9,14 +9,14 @@ import Foundation
 
 @MainActor
 protocol ForgetPasswordEmailViewModel {
-    var coordinator: AnyLoginCoordinator? { get set }
+    var coordinator: AnyNavigationModalCoordinator<LoginRoute>? { get set }
     var verificationErrorMessage: String? { get set }
     func verify(email: String) async -> Bool
 }
 
 @MainActor @Observable
 class ForgetPasswordEmailViewModelImpl: ForgetPasswordEmailViewModel {
-    var coordinator: AnyLoginCoordinator?
+    var coordinator: AnyNavigationModalCoordinator<LoginRoute>?
     
     var verificationErrorMessage: String?
     
@@ -25,7 +25,7 @@ class ForgetPasswordEmailViewModelImpl: ForgetPasswordEmailViewModel {
         return true
     }
     
-    init(coordinator: AnyLoginCoordinator? = nil) {
+    init(coordinator: AnyNavigationModalCoordinator<LoginRoute>? = nil) {
         self.coordinator = coordinator
     }
 }

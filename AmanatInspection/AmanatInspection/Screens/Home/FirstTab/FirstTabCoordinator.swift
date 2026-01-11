@@ -39,12 +39,11 @@ struct FirstTabRouter {
 }
 
 struct FirstTabCoordinatorView: View {
-    @Environment(\.FirstTabCoordinator) var coordinator
-    @State private var navPath = NavigationPath() // Local state
-    @State private var modalScene: FirstTabRoute?
+    @Environment(\.firstTabCoordinator) var coordinator
     
     var body: some View {
-        NavigationStack(path: $navPath) {
+        @Bindable var coordinator = coordinator
+        NavigationStack(path: $coordinator.navPath) {
             FirstTabRouter.view(for: .list(viewModel: FirstTabViewModelImpl()))
                 .navigationDestination(for: FirstTabRoute.self) { route in
                     FirstTabRouter.view(for: route)
@@ -63,20 +62,19 @@ struct FirstTabCoordinatorView: View {
 //                        }
                 }
         }
-        .sheet(item: $modalScene) { modal in
+        .sheet(item: $coordinator.modalScene) { modal in
             FirstTabRouter.view(for: modal)
         }
     }
 }
 
-typealias FirstTabCoordinating = NavigationCoordinator&ModalCoordinator
-class FirstTabCoordinator: FirstTabCoordinating {
+class FirstTabCoordinator: NavigationModalCoordinating {
     var modalScene: FirstTabRoute?
     
     var navPath: [FirstTabRoute] = []
     
     func view() -> some View {
         return FirstTabCoordinatorView()
-            .environment(\.FirstTabCoordinator, self)
+            .environment(\.firstTabCoordinator, AnyNavigationModalCoordinator(self))
     }
 }
