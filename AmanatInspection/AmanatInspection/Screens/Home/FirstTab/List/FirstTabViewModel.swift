@@ -13,16 +13,29 @@ struct Book: Identifiable, Hashable {
 }
 
 @MainActor
-protocol FirstTabViewModel: ObservableObject {
+protocol FirstTabViewModel {
+    var coordinator: AnyNavigationModalCoordinator<FirstTabRoute>? { get set }
+    var tabBarHidden: Bool {get set}
     var books: [String:[Book]] { get set }
-    
+    func viewAppeared()
     func fetchBooks() async
+    func didTapPush(route: FirstTabRoute)
+    func didTapPresent(route: FirstTabRoute)
+    func didTapFullPush(route: FirstTabRoute)
 }
 
-@MainActor
+@MainActor @Observable
 class FirstTabViewModelImpl: FirstTabViewModel {
-    @Published var books: [String:[Book]] = [:]
+    var coordinator: AnyNavigationModalCoordinator<FirstTabRoute>? = nil
+    var tabBarHidden: Bool = false// TODO: move to the navigation coordinator
+    var books: [String:[Book]] = [:]
     
+    init(coordinator: AnyNavigationModalCoordinator<FirstTabRoute>? = nil) {
+        self.coordinator = coordinator
+    }
+    func viewAppeared() {
+        tabBarHidden = false
+    }
     func fetchBooks() async {
         do{
             try await Task.sleep(nanoseconds: 2_000_000_000)
@@ -44,4 +57,17 @@ class FirstTabViewModelImpl: FirstTabViewModel {
                       "E": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
                       "F": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")]]
     }
+    func didTapPush(route: FirstTabRoute) {
+        coordinator?.push(route)
+    }
+    
+    func didTapPresent(route: FirstTabRoute) {
+        coordinator?.presentModal(route)
+    }
+    
+    func didTapFullPush(route: FirstTabRoute) {
+        tabBarHidden = true
+        coordinator?.push(route)
+    }
+    
 }

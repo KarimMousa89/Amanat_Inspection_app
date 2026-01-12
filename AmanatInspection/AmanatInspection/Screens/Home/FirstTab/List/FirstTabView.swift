@@ -9,10 +9,14 @@ import SwiftUI
 
 //Users list & Add new Book
 struct FirstTabView<ViewModel: FirstTabViewModel>: View {
-    @StateObject var viewModel: ViewModel
     @Environment(\.firstTabCoordinator) var coordinator
     
-    @State private var tabBarHidden: Bool = false// TODO: move to the navigation coordinator
+    @State var viewModel: ViewModel
+    
+    init(makeViewModel: @escaping () -> ViewModel) {
+        print("FirstTabView init")
+        _viewModel = State(initialValue: makeViewModel())
+    }
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -24,28 +28,23 @@ struct FirstTabView<ViewModel: FirstTabViewModel>: View {
                             ForEach(viewModel.books[key] ?? []) { book in
                                 HStack {
                                     Button("Push \(book.title)") {
-                                        coordinator.push(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
-                                            print("Push onDismiss")
-                                            coordinator.pop()
-                                        })))
+                                        viewModel.didTapPush(route: FirstTabRoute.details(makeViewModel: {
+                                            FirstTabDetailsViewModelImpl(book: book)
+                                        }))
                                     }
                                     .buttonStyle(.plain)
                                     Spacer()
                                     Button("Present \(book.title)") {
-                                        coordinator.presentModal(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
-                                            print("presentModal onDismiss")
-                                            coordinator.dismissModal()
-                                        })))
+                                        viewModel.didTapPresent(route: FirstTabRoute.details(makeViewModel: {
+                                            FirstTabDetailsViewModelImpl(book: book, isPresented: true)
+                                        }))
                                     }
                                     .buttonStyle(.plain)
                                     Spacer()
                                     Button("PushFull \(book.title)") {
-                                        print("tabBarHidden = true")
-                                        tabBarHidden = true
-                                        coordinator.push(FirstTabRoute.details(viewModel: FirstTabDetailsViewModelImpl(book: book, onDismiss: {
-                                            print("PushFull onDismiss")
-                                            coordinator.pop()
-                                        })))
+                                        viewModel.didTapPush(route: FirstTabRoute.details(makeViewModel: {
+                                            FirstTabDetailsViewModelImpl(book: book)
+                                        }))
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -61,7 +60,6 @@ struct FirstTabView<ViewModel: FirstTabViewModel>: View {
                         ForEach(viewModel.books.keys.sorted(), id: \.self) { letter in
                             Button(action:{
                                 withAnimation {
-                                    print("scroll to \(letter)")
                                     proxy.scrollTo(letter, anchor: .top)
                                 }
                             }) {
@@ -75,12 +73,12 @@ struct FirstTabView<ViewModel: FirstTabViewModel>: View {
             }
             .onAppear {
                 print("tabBarHidden = false")
-                tabBarHidden = false
+                viewModel.viewAppeared()
             }
             .task{
                 await viewModel.fetchBooks()
             }
-            .toolbar(tabBarHidden ?.hidden : .visible, for: .tabBar)
+            .toolbar(viewModel.tabBarHidden ?.hidden : .visible, for: .tabBar)
         }
     }
 }

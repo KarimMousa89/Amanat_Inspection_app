@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 enum FirstTabRoute: Identifiable, Hashable {
-    case list(viewModel: FirstTabViewModelImpl)
-    case details(viewModel: FirstTabDetailsViewModelImpl)
+    case list(makeViewModel: () -> FirstTabViewModelImpl)
+    case details(makeViewModel: () -> FirstTabDetailsViewModelImpl)
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
@@ -30,21 +30,38 @@ struct FirstTabRouter {
     @MainActor @ViewBuilder
     static func view(for route: FirstTabRoute) -> some View {
         switch route {
-        case .list(viewModel: let viewModel):
-            FirstTabView(viewModel: viewModel)
-        case .details(viewModel: let viewModel):
-            FirstTabDetailsView(viewModel: viewModel)
+        case .list(let makeViewModel):
+            FirstTabView(makeViewModel: makeViewModel)
+        case .details(let makeViewModel):
+            FirstTabDetailsView(makeViewModel: makeViewModel)
         }
     }
 }
 
+@MainActor @Observable
+class FirstTabCoordinator {
+    typealias Route = FirstTabRoute
+    var navPath: [Route] = []
+    var modalScene: Route? = nil
+}
+
+extension FirstTabCoordinator: NavigationModalCoordinating {
+    func view() -> some View {
+        return FirstTabCoordinatorView()
+            .environment(\.firstTabCoordinator, AnyNavigationModalCoordinator(self))
+    }
+    func handleURLComponents(_ components: URLComponents) async {
+        
+    }
+}
+
 struct FirstTabCoordinatorView: View {
-    @Environment(\.firstTabCoordinator) var coordinator
+    @Environment(\.firstTabCoordinator) var firstCoordinator
     
     var body: some View {
-        @Bindable var coordinator = coordinator
-        NavigationStack(path: $coordinator.navPath) {
-            FirstTabRouter.view(for: .list(viewModel: FirstTabViewModelImpl()))
+        @Bindable var coordinator1 = firstCoordinator
+        NavigationStack(path: $coordinator1.navPath) {
+            FirstTabRouter.view(for: .list(makeViewModel: { FirstTabViewModelImpl(coordinator: firstCoordinator) }))
                 .navigationDestination(for: FirstTabRoute.self) { route in
                     FirstTabRouter.view(for: route)
                         .navigationBarBackButtonHidden(true)
@@ -62,19 +79,8 @@ struct FirstTabCoordinatorView: View {
 //                        }
                 }
         }
-        .sheet(item: $coordinator.modalScene) { modal in
+        .sheet(item: $coordinator1.modalScene) { modal in
             FirstTabRouter.view(for: modal)
         }
-    }
-}
-
-class FirstTabCoordinator: NavigationModalCoordinating {
-    var modalScene: FirstTabRoute?
-    
-    var navPath: [FirstTabRoute] = []
-    
-    func view() -> some View {
-        return FirstTabCoordinatorView()
-            .environment(\.firstTabCoordinator, AnyNavigationModalCoordinator(self))
     }
 }

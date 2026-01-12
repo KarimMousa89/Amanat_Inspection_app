@@ -8,15 +8,20 @@
 import SwiftUI
 
 struct SecondTabDetailsView<ViewModel: SecondTabDetailsViewModel>: View {
-    @Environment(\.dismiss) private var dismiss
-    @StateObject var viewModel: ViewModel
+    @State var viewModel: ViewModel
     
     var body: some View {
-        Text("Hello, \(viewModel.user.name)")
-        
-        Button("Go Back") {
-//            dismiss()
-            viewModel.onDismiss()
+        VStack {
+            Text("Hello, \(viewModel.user?.name ?? "")")
+            
+            Button("Go Back") {
+                viewModel.onDismiss()
+            }
+        }.onLoad {
+            
+            Task {
+                try await viewModel.loadUserIfNeeded()
+            }
         }
     }
 }

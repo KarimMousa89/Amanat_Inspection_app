@@ -38,8 +38,8 @@ final class HomeCoordinator: TabCoordinating {
     var selectedTab: TabType = .first
     
     private let firstTabCoordinator = FirstTabCoordinator()
-//    private let secondTabCoordinator = SecondTabCoordinator()
-//    private let thirdTabCoordinator = ThirdTabCoordinator()
+    private let secondTabCoordinator = SecondTabCoordinator()
+    private let thirdTabCoordinator = ThirdTabCoordinator()
     
     
     private var navigator: HomeNavigating
@@ -49,10 +49,9 @@ final class HomeCoordinator: TabCoordinating {
     
     func view() -> some View{
         let tabs: [TabItem] = [
-            TabItem(selection: .first, name: "First", image: "house", view: AnyView(firstTabCoordinator.view()))
-//            ,
-//            TabItem(selection: .second, name: "Second", image: "person", view: AnyView(secondTabCoordinator.view())),
-//            TabItem(selection: .third, name: "Third", image: "ellipsis", view: AnyView(thirdTabCoordinator.view()))
+            TabItem(selection: .first, name: "First", image: "house", view: AnyView(firstTabCoordinator.view())),
+            TabItem(selection: .second, name: "Second", image: "person", view: AnyView(secondTabCoordinator.view())),
+            TabItem(selection: .third, name: "Third", image: "ellipsis", view: AnyView(thirdTabCoordinator.view()))
         ]
        return HomeCoordinatorView(tabs: tabs)
             .environment(\.homeCoordinator, AnyTabCoordinator(self))
@@ -60,15 +59,15 @@ final class HomeCoordinator: TabCoordinating {
     }
     
     func handleURLComponents(_ components: URLComponents) async {
-//        let action = components.host
-//        switch action {
-//        case "showUser":
-//            NSLog("KK:: second tab related action!")
-//            selectedTab = .second
-//            await secondTabCoordinator.handleURLComponents(components)
-//        default:
-//            NSLog("KK:: Unknown URL action: \(String(describing: action))")
-//        }
+        let action = components.host
+        switch action {
+        case "showUser":
+            NSLog("KK:: second tab related action!")
+            selectedTab = .second
+            await secondTabCoordinator.handleURLComponents(components)
+        default:
+            NSLog("KK:: Unknown URL action: \(String(describing: action))")
+        }
     }
 }
 

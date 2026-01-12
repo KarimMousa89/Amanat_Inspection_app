@@ -78,29 +78,34 @@ class LoginCoordinator {
     typealias Route = LoginRoute
     var navPath: [Route] = []
     var modalScene: Route? = nil
+    var visitorAllowed: Bool
     
     private var navigator: LoginNavigating
-    init(navigator: LoginNavigating) {
+    init(navigator: LoginNavigating, visitorAllowed: Bool = true) {
         self.navigator = navigator
+        self.visitorAllowed = visitorAllowed
     }
 }
 
 extension LoginCoordinator: NavigationModalCoordinating {
     func view() -> some View {
         print("LoginCoordinator.view")
-        return LoginCoordinatorView()
+        return LoginCoordinatorView(visitorAllowed: visitorAllowed)
             .environment(\.loginCoordinator, AnyNavigationModalCoordinator(self))
             .environment(\.loginNavigator, navigator)
     }
+    
+    func handleURLComponents(_ components: URLComponents) async {}
 }
 
 struct LoginCoordinatorView: View {
     @Environment(\.loginCoordinator) private var coordinator
+    @State var visitorAllowed: Bool = true
     
     var body: some View {
         @Bindable var coordinator = coordinator
         NavigationStack(path: $coordinator.navPath) {
-            LoginRouter.view(for: .userSelection)
+            initialView
                 .navigationDestination(for: LoginRoute.self) { route in
                     LoginRouter.view(for: route)
                     //                        .navigationBarBackButtonHidden(true)
@@ -120,6 +125,16 @@ struct LoginCoordinatorView: View {
         }
         .sheet(item: $coordinator.modalScene) { modal in
             LoginRouter.view(for: modal)
+        }
+    }
+    
+    var initialView: some View {
+        if visitorAllowed {
+            LoginRouter.view(for: .userSelection)
+        } else {
+            LoginRouter.view(for: .login(makeViewModel: {
+                LoginViewModelImpl(coordinator: coordinator)
+            }))
         }
     }
 }

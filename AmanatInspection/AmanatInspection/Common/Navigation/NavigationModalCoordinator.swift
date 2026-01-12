@@ -64,7 +64,7 @@ extension ModalCoordinator {
     }
 }
 
-typealias NavigationModalCoordinating = NavigationCoordinator&ModalCoordinator
+typealias NavigationModalCoordinating = NavigationCoordinator&ModalCoordinator&URLComponentsHandler
 
 @MainActor @Observable
 final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoordinating {
@@ -74,12 +74,13 @@ final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoord
     
     // 1. The internal, type-erased storage box.
     @MainActor
-    private class BaseNavigationModalCoordinatorBox {
+    private class BaseNavigationModalCoordinatorBox: NavigationModalCoordinating {
         // We define the properties and methods we need to access.
         // These are abstract and will be implemented by a generic subclass.
         var navPath: [Route] { get { fatalError() } set { fatalError() } }
         var modalScene: Route? { get { fatalError() } set { fatalError() } }
         func view() -> AnyView { fatalError() }
+        func handleURLComponents(_ components: URLComponents) async { fatalError() }
     }
 
     // 2. A generic subclass of the box that captures the concrete coordinator type.
@@ -106,6 +107,10 @@ final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoord
             // It's used to erase the ViewType of the wrapped coordinator.
             return AnyView(wrapped.view())
         }
+        
+        override func handleURLComponents(_ components: URLComponents) async {
+            await wrapped.handleURLComponents(components)
+        }
     }
 
     private let box: BaseNavigationModalCoordinatorBox
@@ -126,5 +131,9 @@ final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoord
 
     func view() -> some View {
         box.view()
+    }
+    
+    func handleURLComponents(_ components: URLComponents) async {
+        await box.handleURLComponents(components)
     }
 }

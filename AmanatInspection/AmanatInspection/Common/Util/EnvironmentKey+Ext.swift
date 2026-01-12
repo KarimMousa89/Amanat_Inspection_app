@@ -84,7 +84,6 @@ final class TempHomeNavigator: HomeNavigating {
 }
 
 // MARK: - FirstTabCoordinatorEnvironmentKey
-
 private struct FirstTabCoordinatorKey: @MainActor EnvironmentKey {
     @MainActor static let defaultValue: AnyNavigationModalCoordinator = AnyNavigationModalCoordinator(FirstTabCoordinator())
 }
@@ -96,3 +95,14 @@ extension EnvironmentValues {
     }
 }
 
+// MARK: - SecondTabCoordinatorEnvironmentKey
+private struct SecondTabCoordinatorKey: @MainActor EnvironmentKey {
+    @MainActor static let defaultValue: AnyNavigationModalCoordinator = AnyNavigationModalCoordinator(SecondTabCoordinator())
+}
+
+extension EnvironmentValues {
+    @MainActor var secondTabCoordinator: AnyNavigationModalCoordinator<SecondTabRoute> {
+        get { self[SecondTabCoordinatorKey.self] }
+        set { self[SecondTabCoordinatorKey.self] = newValue }
+    }
+}

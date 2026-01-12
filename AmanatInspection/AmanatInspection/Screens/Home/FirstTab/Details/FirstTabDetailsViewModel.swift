@@ -7,17 +7,30 @@
 
 import Foundation
 
-protocol FirstTabDetailsViewModel: ObservableObject {
+@MainActor
+protocol FirstTabDetailsViewModel {
+    var coordinator: (any NavigationModalCoordinating)? {get set}
     var book: Book { get }
-    var onDismiss: () -> Void { get }
+    var isPresented: Bool { get }
+    func didTapBack()
 }
 
+@MainActor @Observable
 class FirstTabDetailsViewModelImpl: FirstTabDetailsViewModel {
-    var onDismiss: () -> Void
-    @Published var book: Book
+    var coordinator: (any NavigationModalCoordinating)? = nil
+    var book: Book
+    var isPresented: Bool
     
-    init(book: Book, onDismiss: @escaping () -> Void) {
+    init(book: Book, isPresented: Bool = false) {
         self.book = book
-        self.onDismiss = onDismiss
+        self.isPresented = isPresented
+    }
+    
+    func didTapBack() {
+        if isPresented {
+            coordinator?.dismissModal()
+        } else {
+            coordinator?.pop()
+        }
     }
 }

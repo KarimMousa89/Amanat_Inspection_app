@@ -8,13 +8,22 @@
 import SwiftUI
 
 struct FirstTabDetailsView<ViewModel: FirstTabDetailsViewModel>: View {
-    @StateObject var viewModel: ViewModel
+    @Environment(\.firstTabCoordinator) var coordinator
+    @State var viewModel: ViewModel
+    
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
+    }
     
     var body: some View {
-        Text("Hello, \(viewModel.book.title)")
-        
-        Button("Go Back") {
-            viewModel.onDismiss()
+        VStack {
+            Text("Hello, \(viewModel.book.title)")
+            
+            Button("Go Back") {
+                viewModel.didTapBack()
+            }
+        }.onLoad {
+            viewModel.coordinator = coordinator
         }
     }
 }
