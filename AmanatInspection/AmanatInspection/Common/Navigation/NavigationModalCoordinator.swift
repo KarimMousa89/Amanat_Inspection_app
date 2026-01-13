@@ -8,6 +8,47 @@
 import Foundation
 import SwiftUI
 
+enum NavigationAction<Route> {
+    case push(Route)
+    case present(Route)
+    case pop
+    case popToRoot
+    case popLast(Int)
+    case dismiss
+    case reset(Route)
+}
+
+extension NavigationAction {
+    var route: Route? {
+        switch self {
+        case .push(let route),
+                .present(let route),
+                .reset(let route):
+            return route
+        default:
+            return nil
+        }
+    }
+}
+
+extension NavigationAction {
+    func eraseRoute<NewRoute>() -> NavigationAction<NewRoute>? {
+        switch self {
+        case .pop:
+            return .pop
+        case .popToRoot:
+            return .popToRoot
+        case .popLast(let count):
+            return .popLast(count)
+        case .dismiss:
+            return .dismiss
+        default: // rootless navigation actions don't need to be erased
+            return nil
+        }
+    }
+}
+
+
 @MainActor
 protocol NavigationCoordinator: Coordinator {
     associatedtype Route: Hashable
@@ -64,7 +105,31 @@ extension ModalCoordinator {
     }
 }
 
-typealias NavigationModalCoordinating = NavigationCoordinator&ModalCoordinator&URLComponentsHandler
+@MainActor
+protocol NavigationModalCoordinating: NavigationCoordinator, ModalCoordinator, URLComponentsHandler {
+    func perform(_ action: NavigationAction<Route>)
+}
+
+extension NavigationModalCoordinating {
+    func perform(_ action: NavigationAction<Route>) {
+        switch action {
+        case .push(let destination):
+            push(destination)
+        case .pop:
+            pop()
+        case .popToRoot:
+            popToRoot()
+        case .popLast(let count):
+            popLast(count)
+        case .reset(let destination):
+            resetToNewRoot(destination)
+        case .present(let scene):
+            presentModal(scene)
+        case .dismiss:
+            dismissModal()
+        }
+    }
+}
 
 @MainActor @Observable
 final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoordinating {
@@ -80,7 +145,7 @@ final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoord
         var navPath: [Route] { get { fatalError() } set { fatalError() } }
         var modalScene: Route? { get { fatalError() } set { fatalError() } }
         func view() -> AnyView { fatalError() }
-        func handleURLComponents(_ components: URLComponents) async { fatalError() }
+        func handleURLComponents(_ components: URLComponents) { fatalError() }
     }
 
     // 2. A generic subclass of the box that captures the concrete coordinator type.
@@ -108,8 +173,8 @@ final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoord
             return AnyView(wrapped.view())
         }
         
-        override func handleURLComponents(_ components: URLComponents) async {
-            await wrapped.handleURLComponents(components)
+        override func handleURLComponents(_ components: URLComponents) {
+            wrapped.handleURLComponents(components)
         }
     }
 
@@ -133,7 +198,7 @@ final class AnyNavigationModalCoordinator<Route: Hashable>: NavigationModalCoord
         box.view()
     }
     
-    func handleURLComponents(_ components: URLComponents) async {
-        await box.handleURLComponents(components)
+    func handleURLComponents(_ components: URLComponents) {
+        box.handleURLComponents(components)
     }
 }

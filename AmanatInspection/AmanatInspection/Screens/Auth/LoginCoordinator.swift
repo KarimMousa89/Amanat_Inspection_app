@@ -94,8 +94,6 @@ extension LoginCoordinator: NavigationModalCoordinating {
             .environment(\.loginCoordinator, AnyNavigationModalCoordinator(self))
             .environment(\.loginNavigator, navigator)
     }
-    
-    func handleURLComponents(_ components: URLComponents) async {}
 }
 
 struct LoginCoordinatorView: View {

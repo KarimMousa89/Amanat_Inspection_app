@@ -41,7 +41,6 @@ final class HomeCoordinator: TabCoordinating {
     private let secondTabCoordinator = SecondTabCoordinator()
     private let thirdTabCoordinator = ThirdTabCoordinator()
     
-    
     private var navigator: HomeNavigating
     init(navigator: HomeNavigating) {
         self.navigator = navigator
@@ -58,17 +57,171 @@ final class HomeCoordinator: TabCoordinating {
             .environment(\.homeNavigator, navigator)
     }
     
-    func handleURLComponents(_ components: URLComponents) async {
+    func handleURLComponents(_ components: URLComponents) {
         let action = components.host
         switch action {
         case "showUser":
             NSLog("KK:: second tab related action!")
             selectedTab = .second
-            await secondTabCoordinator.handleURLComponents(components)
+            secondTabCoordinator.handleURLComponents(components)
         default:
             NSLog("KK:: Unknown URL action: \(String(describing: action))")
         }
     }
+    
+    func perform(on tab: TabType, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+        if switchTab {
+            self.selectedTab = tab
+        }
+        
+        guard let route = action.route else {
+            switch tab {
+            case .first:
+                guard let erasedAction: NavigationAction<FirstTabRoute> = action.eraseRoute() else { return }
+                firstTabCoordinator.perform(erasedAction)
+            case .second:
+                guard let erasedAction: NavigationAction<SecondTabRoute> = action.eraseRoute() else { return }
+                secondTabCoordinator.perform(erasedAction)
+            default:
+                break
+            }
+            return
+        }
+
+        guard let resolvedRoute = resolve(tab: tab, route: route) else { return }
+
+        perform(action, with: resolvedRoute)
+    }
+    
+    func perform(on tab: TabType, actionType: ActionType, route: CrossTabRoute? = nil, switchTab: Bool = true) {
+        if switchTab {
+            self.selectedTab = tab
+        }
+        
+        if actionType == .popToRoot {
+            switch tab {
+            case .first:
+                firstTabCoordinator.dismissModal()
+                firstTabCoordinator.popToRoot()
+            case .second:
+                secondTabCoordinator.dismissModal()
+                secondTabCoordinator.popToRoot()
+            default:
+                break
+            }
+            return
+        }
+        
+        switch tab {
+        case .first:
+            switch route {
+            case .bookDetais(let book):
+                let firstTabRoute: FirstTabRoute = .details(makeViewModel: {
+                    FirstTabDetailsViewModelImpl(book: book)
+                })
+                switch (actionType) {
+                case .push:
+                    firstTabCoordinator.push(firstTabRoute)
+                    break
+                case .present:
+                    firstTabCoordinator.presentModal(firstTabRoute)
+                    break
+                default:
+                    break
+                }
+                break
+            default:
+                break
+            }
+            break
+        case .second:
+            switch route {
+            case .userDetails(let user):
+                guard let model = SecondTabDetailsViewModelImpl(user: user, onDismiss: {
+                    self.secondTabCoordinator.pop()
+                }) else {
+                    return
+                }
+                let secondTabRoute: SecondTabRoute = .details(viewModel: model)
+                switch (actionType) {
+                case .push:
+                    secondTabCoordinator.push(secondTabRoute)
+                    break
+                case .present:
+                    secondTabCoordinator.presentModal(secondTabRoute)
+                    break
+                default:
+                    break
+                }
+                break
+            default:
+                break
+            }
+            break
+        case .third:
+            break
+        }
+    }
+}
+
+private extension HomeCoordinator{
+    private enum ResolvedCrossTabRoute {/// No Third Tab here because no cross tab navigation happens on it
+        case first(FirstTabRoute)
+        case second(SecondTabRoute)
+    }
+
+    private func resolve( tab: TabType, route: CrossTabRoute) -> ResolvedCrossTabRoute? {
+        switch (tab, route) {
+        case (.first, .bookDetais(let book)):
+            return .first(
+                .details(makeViewModel: {
+                    FirstTabDetailsViewModelImpl(book: book)
+                })
+            )
+        case (.second, .userDetails(let user)):
+            guard let model = SecondTabDetailsViewModelImpl(
+                user: user,
+                onDismiss: { self.secondTabCoordinator.pop() }
+            ) else { return nil }
+
+            return .second(.details(viewModel: model))
+        default:
+            return nil
+        }
+    }
+    
+    private func perform(_ action: NavigationAction<CrossTabRoute>, with resolved: ResolvedCrossTabRoute) {
+        switch (action, resolved) {
+        case (.push, .first(let route)):
+            firstTabCoordinator.perform(.push(route))
+        case (.present, .first(let route)):
+            firstTabCoordinator.perform(.present(route))
+        case (.reset, .first(let route)):
+            firstTabCoordinator.perform(.reset(route))
+        case (.push, .second(let route)):
+            secondTabCoordinator.perform(.push(route))
+        case (.present, .second(let route)):
+            secondTabCoordinator.perform(.present(route))
+        case (.reset, .second(let route)):
+            secondTabCoordinator.perform(.reset(route))
+        default:
+            break
+        }
+    }
+}
+
+enum ActionType: Hashable {
+    case push
+    case present
+    case popToRoot
+    //    case reset
+    //    case pop
+    //    case dismiss
+}
+
+enum CrossTabRoute: Hashable {
+    case userDetails(user: User)
+    case bookDetais(book: Book)
 }
 
 struct HomeCoordinatorView: View {

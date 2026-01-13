@@ -55,7 +55,7 @@ extension SecondTabCoordinator: NavigationModalCoordinating {
             .environment(\.secondTabCoordinator, AnyNavigationModalCoordinator(self))
     }
     
-    func handleURLComponents(_ components: URLComponents) async{
+    func handleURLComponents(_ components: URLComponents){
         let action = components.host
         switch action {
         case "showUser":

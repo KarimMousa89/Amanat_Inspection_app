@@ -12,6 +12,8 @@ import SwiftUI
 protocol TabCoordinator: Coordinator {
     associatedtype TabType: Hashable
     var selectedTab: TabType {get set}
+    func perform(on tab: TabType, actionType: ActionType, route: CrossTabRoute?, switchTab: Bool)
+    func perform(on tab: TabType, action: NavigationAction<CrossTabRoute>, switchTab: Bool)
 }
 
 typealias TabCoordinating = TabCoordinator&URLComponentsHandler
@@ -24,12 +26,19 @@ final class AnyTabCoordinator<Tab: Hashable>: TabCoordinating {
     
     // 1. The internal, type-erased storage box.
     @MainActor
-    private class BaseTabCoordinatorBox {
+    private class BaseTabCoordinatorBox: TabCoordinating {
+        func perform(on tab: Tab, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+            fatalError()
+        }
+        
         // We define the properties and methods we need to access.
         // These are abstract and will be implemented by a generic subclass.
         var selectedTab: Tab { get { fatalError() } set { fatalError() } }
         func view() -> AnyView { fatalError() }
-        func handleURLComponents(_ components: URLComponents) async {}
+        func handleURLComponents(_ components: URLComponents) { fatalError() }
+        func perform(on tab: Tab, actionType: ActionType, route: CrossTabRoute?, switchTab: Bool) {
+            fatalError()
+        }
     }
 
     // 2. A generic subclass of the box that captures the concrete coordinator type.
@@ -52,8 +61,16 @@ final class AnyTabCoordinator<Tab: Hashable>: TabCoordinating {
             return AnyView(wrapped.view())
         }
         
-        override func handleURLComponents(_ components: URLComponents) async {
-            await wrapped.handleURLComponents(components)
+        override func handleURLComponents(_ components: URLComponents) {
+            wrapped.handleURLComponents(components)
+        }
+        
+        override func perform(on tab: Tab, actionType: ActionType, route: CrossTabRoute?, switchTab: Bool) {
+            wrapped.perform(on: tab, actionType: actionType, route: route, switchTab: switchTab)
+        }
+        
+        override func perform(on tab: Tab, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+            wrapped.perform(on: tab, action: action, switchTab: switchTab)
         }
     }
 
@@ -68,11 +85,18 @@ final class AnyTabCoordinator<Tab: Hashable>: TabCoordinating {
         set { box.selectedTab = newValue }
     }
     
-    func handleURLComponents(_ components: URLComponents) async {
-        await box.handleURLComponents(components)
+    func handleURLComponents(_ components: URLComponents) {
+        box.handleURLComponents(components)
     }
     
     func view() -> some View {
         box.view()
+    }
+    
+    func perform(on tab: Tab, actionType: ActionType, route: CrossTabRoute?, switchTab: Bool) {
+        box.perform(on: tab, actionType: actionType, route: route, switchTab: switchTab)
+    }
+    func perform(on tab: Tab, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+        box.perform(on: tab, action: action, switchTab: switchTab)
     }
 }

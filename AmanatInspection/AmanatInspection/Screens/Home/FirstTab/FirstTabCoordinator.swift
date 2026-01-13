@@ -50,9 +50,6 @@ extension FirstTabCoordinator: NavigationModalCoordinating {
         return FirstTabCoordinatorView()
             .environment(\.firstTabCoordinator, AnyNavigationModalCoordinator(self))
     }
-    func handleURLComponents(_ components: URLComponents) async {
-        
-    }
 }
 
 struct FirstTabCoordinatorView: View {

@@ -18,13 +18,14 @@ struct ThirdTabView: View {
         
         Button("DeepLink Go to Second Tab details view") {
             if let urlComponents = URLComponents(string: "fifthDemo://showUser?userId=5") {
-                Task {
-                    await coordinator.handleURLComponents(urlComponents)
-                }
+                coordinator.handleURLComponents(urlComponents)
             }
         }
         
-        
+        Button("Cross Tab Navigate to First Tab details view") {
+            coordinator.perform(on: .first, action: .push(.bookDetais(book: Book(title: "Karim"))), switchTab: true)
+//            coordinator.perform(on: .first, actionType: .push, route: .bookDetais(book: Book(title: "Karim")), switchTab: true)
+        }
     }
 }
 

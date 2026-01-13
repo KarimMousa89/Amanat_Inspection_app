@@ -10,7 +10,11 @@ import SwiftUI
 
 @MainActor
 protocol URLComponentsHandler {
-    func handleURLComponents(_ components: URLComponents) async
+    func handleURLComponents(_ components: URLComponents)
+}
+
+extension URLComponentsHandler {
+    func handleURLComponents(_ components: URLComponents) {}
 }
 
 @MainActor

@@ -104,12 +104,12 @@ extension AppRootCoordinatorImp: RootCoordinating {
             .environment(\.rootCoordinator, self)
     }
     
-    func handleURLComponents(_ components: URLComponents) async {
+    func handleURLComponents(_ components: URLComponents) {
         let action = components.host
         switch action {
         case "showUser":
             NSLog("KK:: Home related action!")
-            await homeCoordinator?.handleURLComponents(components)
+            homeCoordinator?.handleURLComponents(components)
         default:
             NSLog("KK:: Unknown URL action: \(String(describing: action))")
         }
