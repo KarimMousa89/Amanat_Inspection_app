@@ -14,7 +14,6 @@ struct FirstTabView<ViewModel: FirstTabViewModel>: View {
     @State var viewModel: ViewModel
     
     init(makeViewModel: @escaping () -> ViewModel) {
-        print("FirstTabView init")
         _viewModel = State(initialValue: makeViewModel())
     }
     
@@ -28,23 +27,17 @@ struct FirstTabView<ViewModel: FirstTabViewModel>: View {
                             ForEach(viewModel.books[key] ?? []) { book in
                                 HStack {
                                     Button("Push \(book.title)") {
-                                        viewModel.didTapPush(route: FirstTabRoute.details(makeViewModel: {
-                                            FirstTabDetailsViewModelImpl(book: book)
-                                        }))
+                                        viewModel.didTapPush(book: book)
                                     }
                                     .buttonStyle(.plain)
                                     Spacer()
                                     Button("Present \(book.title)") {
-                                        viewModel.didTapPresent(route: FirstTabRoute.details(makeViewModel: {
-                                            FirstTabDetailsViewModelImpl(book: book, isPresented: true)
-                                        }))
+                                        viewModel.didTapPresent(book: book)
                                     }
                                     .buttonStyle(.plain)
                                     Spacer()
                                     Button("PushFull \(book.title)") {
-                                        viewModel.didTapPush(route: FirstTabRoute.details(makeViewModel: {
-                                            FirstTabDetailsViewModelImpl(book: book)
-                                        }))
+                                        viewModel.didTapFullPush(book: book)
                                     }
                                     .buttonStyle(.plain)
                                 }

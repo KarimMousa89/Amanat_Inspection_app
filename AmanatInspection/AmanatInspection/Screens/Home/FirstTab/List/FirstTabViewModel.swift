@@ -19,13 +19,35 @@ protocol FirstTabViewModel {
     var books: [String:[Book]] { get set }
     func viewAppeared()
     func fetchBooks() async
-    func didTapPush(route: FirstTabRoute)
-    func didTapPresent(route: FirstTabRoute)
-    func didTapFullPush(route: FirstTabRoute)
+    func didTapPush(book: Book)
+    func didTapPresent(book: Book)
+    func didTapFullPush(book: Book)
 }
 
 @MainActor @Observable
 class FirstTabViewModelImpl: FirstTabViewModel {
+    func didTapPush(book: Book) {
+        let route = FirstTabRoute.details(makeViewModel: {
+            FirstTabDetailsViewModelImpl(book: book)
+        })
+        coordinator?.push(route)
+    }
+    
+    func didTapPresent(book: Book) {
+        let route = FirstTabRoute.details(makeViewModel: {
+            FirstTabDetailsViewModelImpl(book: book, isPresented: true)
+        })
+        coordinator?.presentModal(route)
+    }
+    
+    func didTapFullPush(book: Book) {
+        tabBarHidden = true
+        let route = FirstTabRoute.details(makeViewModel: {
+            FirstTabDetailsViewModelImpl(book: book)
+        })
+        coordinator?.push(route)
+    }
+    
     var coordinator: AnyNavigationModalCoordinator<FirstTabRoute>? = nil
     var tabBarHidden: Bool = false// TODO: move to the navigation coordinator
     var books: [String:[Book]] = [:]
@@ -57,17 +79,4 @@ class FirstTabViewModelImpl: FirstTabViewModel {
                       "E": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
                       "F": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")]]
     }
-    func didTapPush(route: FirstTabRoute) {
-        coordinator?.push(route)
-    }
-    
-    func didTapPresent(route: FirstTabRoute) {
-        coordinator?.presentModal(route)
-    }
-    
-    func didTapFullPush(route: FirstTabRoute) {
-        tabBarHidden = true
-        coordinator?.push(route)
-    }
-    
 }

@@ -8,16 +8,16 @@
 import Foundation
 import SwiftUI
 
-enum HomeTab: Hashable {
-    case first
+enum HomeTab: Int {
+    case first = 0
     case second
     case third
 }
 
-struct TabItem: Identifiable {
+struct TabItem<TabType: Hashable>: Identifiable {
     var id = UUID()
     
-    var selection: HomeTab
+    var selection: TabType
     var name: String
     var image: String
     var view: AnyView
@@ -47,7 +47,7 @@ final class HomeCoordinator: TabCoordinating {
     }
     
     func view() -> some View{
-        let tabs: [TabItem] = [
+        let tabs: [TabItem<HomeTab>] = [
             TabItem(selection: .first, name: "First", image: "house", view: AnyView(firstTabCoordinator.view())),
             TabItem(selection: .second, name: "Second", image: "person", view: AnyView(secondTabCoordinator.view())),
             TabItem(selection: .third, name: "Third", image: "ellipsis", view: AnyView(thirdTabCoordinator.view()))
@@ -92,76 +92,6 @@ final class HomeCoordinator: TabCoordinating {
 
         perform(action, with: resolvedRoute)
     }
-    
-    func perform(on tab: TabType, actionType: ActionType, route: CrossTabRoute? = nil, switchTab: Bool = true) {
-        if switchTab {
-            self.selectedTab = tab
-        }
-        
-        if actionType == .popToRoot {
-            switch tab {
-            case .first:
-                firstTabCoordinator.dismissModal()
-                firstTabCoordinator.popToRoot()
-            case .second:
-                secondTabCoordinator.dismissModal()
-                secondTabCoordinator.popToRoot()
-            default:
-                break
-            }
-            return
-        }
-        
-        switch tab {
-        case .first:
-            switch route {
-            case .bookDetais(let book):
-                let firstTabRoute: FirstTabRoute = .details(makeViewModel: {
-                    FirstTabDetailsViewModelImpl(book: book)
-                })
-                switch (actionType) {
-                case .push:
-                    firstTabCoordinator.push(firstTabRoute)
-                    break
-                case .present:
-                    firstTabCoordinator.presentModal(firstTabRoute)
-                    break
-                default:
-                    break
-                }
-                break
-            default:
-                break
-            }
-            break
-        case .second:
-            switch route {
-            case .userDetails(let user):
-                guard let model = SecondTabDetailsViewModelImpl(user: user, onDismiss: {
-                    self.secondTabCoordinator.pop()
-                }) else {
-                    return
-                }
-                let secondTabRoute: SecondTabRoute = .details(viewModel: model)
-                switch (actionType) {
-                case .push:
-                    secondTabCoordinator.push(secondTabRoute)
-                    break
-                case .present:
-                    secondTabCoordinator.presentModal(secondTabRoute)
-                    break
-                default:
-                    break
-                }
-                break
-            default:
-                break
-            }
-            break
-        case .third:
-            break
-        }
-    }
 }
 
 private extension HomeCoordinator{
@@ -179,12 +109,10 @@ private extension HomeCoordinator{
                 })
             )
         case (.second, .userDetails(let user)):
-            guard let model = SecondTabDetailsViewModelImpl(
-                user: user,
-                onDismiss: { self.secondTabCoordinator.pop() }
-            ) else { return nil }
-
-            return .second(.details(viewModel: model))
+            guard let model = SecondTabDetailsViewModelImpl(user: user) else { return nil }
+            return .second(.details(makeViewModel: {
+                model
+            }))
         default:
             return nil
         }
@@ -210,24 +138,15 @@ private extension HomeCoordinator{
     }
 }
 
-enum ActionType: Hashable {
-    case push
-    case present
-    case popToRoot
-    //    case reset
-    //    case pop
-    //    case dismiss
-}
-
 enum CrossTabRoute: Hashable {
     case userDetails(user: User)
     case bookDetais(book: Book)
 }
 
 struct HomeCoordinatorView: View {
-    @Environment(\.homeCoordinator) var coordinator: AnyTabCoordinator
+    @Environment(\.homeCoordinator) var coordinator
     
-    var tabs: [TabItem]
+    var tabs: [TabItem<HomeTab>]
     
     var body: some View {
         @Bindable var coordinator = coordinator

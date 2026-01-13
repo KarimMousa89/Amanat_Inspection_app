@@ -30,6 +30,36 @@
             endingLineNumber = "32"
             landmarkName = "view(for:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "95ECB044-5DE9-4094-94E4-2BB4C1045A8C - 1051c88fdca01623"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static AmanatInspection.FirstTabRouter.view(for: AmanatInspection.FirstTabRoute) -&gt; some"
+                  moduleName = "AmanatInspection.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Shared/Data/TestProjects/Code/Amanat_Inspection_app/AmanatInspection/AmanatInspection/Screens/Home/FirstTab/FirstTabCoordinator.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "33"
+                  endingLineNumber = "33">
+               </Location>
+               <Location
+                  uuid = "95ECB044-5DE9-4094-94E4-2BB4C1045A8C - 1051c88fdca01623"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "static AmanatInspection.FirstTabRouter.view(for: AmanatInspection.FirstTabRoute) -&gt; some"
+                  moduleName = "AmanatInspection.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Shared/Data/TestProjects/Code/Amanat_Inspection_app/AmanatInspection/AmanatInspection/Screens/Home/FirstTab/FirstTabCoordinator.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "33"
+                  endingLineNumber = "33">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -42,8 +72,8 @@
             filePath = "AmanatInspection/Screens/Home/FirstTab/List/FirstTabView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "31"
-            endingLineNumber = "31"
+            startingLineNumber = "30"
+            endingLineNumber = "30"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>

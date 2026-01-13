@@ -8,17 +8,22 @@
 import SwiftUI
 
 struct SecondTabDetailsView<ViewModel: SecondTabDetailsViewModel>: View {
+    @Environment(\.secondTabCoordinator) var coordinator
     @State var viewModel: ViewModel
+    
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
+    }
     
     var body: some View {
         VStack {
             Text("Hello, \(viewModel.user?.name ?? "")")
             
             Button("Go Back") {
-                viewModel.onDismiss()
+                viewModel.dismiss()
             }
         }.onLoad {
-            
+            viewModel.coordinator = coordinator
             Task {
                 try await viewModel.loadUserIfNeeded()
             }

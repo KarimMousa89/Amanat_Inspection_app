@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 enum SecondTabRoute: Identifiable, Hashable {
-    case list(viewModel: SecondTabViewModelImpl)
-    case details(viewModel: SecondTabDetailsViewModelImpl)
+    case list(makeViewModel: () -> SecondTabViewModelImpl)
+    case details(makeViewModel: () -> SecondTabDetailsViewModelImpl)
     case addUser(coordinator: LoginCoordinator)
     
     func hash(into hasher: inout Hasher) {
@@ -32,10 +32,10 @@ struct SecondTabRouter {
     @MainActor @ViewBuilder
     static func view(for route: SecondTabRoute) -> some View {
         switch route {
-        case .list(viewModel: let viewModel):
-            SecondTabView(viewModel: viewModel)
-        case .details(viewModel: let viewModel):
-            SecondTabDetailsView(viewModel: viewModel)
+        case .list(let makeViewModel):
+            SecondTabView(makeViewModel: makeViewModel)
+        case .details(let makeViewModel):
+            SecondTabDetailsView(makeViewModel: makeViewModel)
         case .addUser(coordinator: let coordinator):
             coordinator.view()
         }
@@ -65,8 +65,10 @@ extension SecondTabCoordinator: NavigationModalCoordinating {
                 return
             }
             
-            guard let model = SecondTabDetailsViewModelImpl(userId: userId, onDismiss: { self.pop() }) else { return }
-            push( SecondTabRoute.details(viewModel: model) )
+            guard let model = SecondTabDetailsViewModelImpl(userId: userId) else { return }
+            push( SecondTabRoute.details(makeViewModel: {
+                model
+            }))
         default:
             NSLog("KK:: Unknown URL action: \(String(describing: action))")
         }
@@ -79,7 +81,7 @@ struct SecondTabCoordinatorView: View {
     var body: some View {
         @Bindable var coordinator = coordinator
         NavigationStack(path: $coordinator.navPath) {
-            SecondTabRouter.view(for: .list(viewModel: SecondTabViewModelImpl()))
+            SecondTabRouter.view(for: .list(makeViewModel: { SecondTabViewModelImpl() }))
                 .navigationDestination(for: SecondTabRoute.self) { route in
                     SecondTabRouter.view(for: route)
                         .navigationBarBackButtonHidden(true)

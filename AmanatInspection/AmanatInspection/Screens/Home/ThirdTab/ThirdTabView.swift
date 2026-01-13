@@ -7,28 +7,33 @@
 
 import SwiftUI
 
-struct ThirdTabView: View {
+struct ThirdTabView<ViewModel: ThirdTabViewModel>: View {
     @Environment(\.homeCoordinator) var coordinator
     @Environment(\.homeNavigator) var logoutSuccessHandler
     
+    @State var viewModel: ViewModel
+    
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
+    }
+    
     var body: some View {
-        Button("Logout") {
-            logoutSuccessHandler.logoutDidSuccess()
-        }
-        
-        Button("DeepLink Go to Second Tab details view") {
-            if let urlComponents = URLComponents(string: "fifthDemo://showUser?userId=5") {
-                coordinator.handleURLComponents(urlComponents)
+        VStack {
+            Button("Logout") {
+                viewModel.didTapLogout()
+            }
+            
+            Button("DeepLink Go to Second Tab details view") {
+                viewModel.didTapDeeplinkSimulation()
+            }
+            
+            Button("Cross Tab Navigate to First Tab details view") {
+                viewModel.didTapSwitchToFirstTab()
             }
         }
-        
-        Button("Cross Tab Navigate to First Tab details view") {
-            coordinator.perform(on: .first, action: .push(.bookDetais(book: Book(title: "Karim"))), switchTab: true)
-//            coordinator.perform(on: .first, actionType: .push, route: .bookDetais(book: Book(title: "Karim")), switchTab: true)
+        .onLoad {
+            viewModel.coordinator = coordinator
+            viewModel.navigator = logoutSuccessHandler
         }
     }
-}
-
-#Preview {
-    ThirdTabView()
 }

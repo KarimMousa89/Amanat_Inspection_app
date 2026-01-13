@@ -11,7 +11,9 @@ import SwiftUI
 @MainActor @Observable
 class ThirdTabCoordinator: Coordinator {
     func view() -> some View {
-       ThirdTabView()
+        ThirdTabView(makeViewModel: {
+            ThirdTabViewModelImpl()
+        })
             .environment(self)
     }
 }

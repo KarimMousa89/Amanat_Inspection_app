@@ -9,26 +9,25 @@ import Foundation
 
 @MainActor
 protocol SecondTabDetailsViewModel {
+    var coordinator: AnyNavigationModalCoordinator<SecondTabRoute>? { get set }
     var userId: String? { get }
     var user: User? { get }
-    var onDismiss: () -> Void { get }
+    func dismiss()
     func loadUserIfNeeded() async throws
 }
 
 @MainActor @Observable
 class SecondTabDetailsViewModelImpl: SecondTabDetailsViewModel {
-    var onDismiss: () -> Void
+    var coordinator: AnyNavigationModalCoordinator<SecondTabRoute>? = nil
     var user: User?
     var userId: String?
     
-    init?(userId: String? = nil, user: User? = nil, onDismiss: @escaping () -> Void) {
+    init?(userId: String? = nil, user: User? = nil) {
         if userId == nil && user == nil {
             return nil
         }
-        
         self.userId = userId
         self.user = user
-        self.onDismiss = onDismiss
     }
     
     func loadUserIfNeeded() async throws {
@@ -39,5 +38,9 @@ class SecondTabDetailsViewModelImpl: SecondTabDetailsViewModel {
         try await Task.sleep(nanoseconds: 100_000_000)
         
         self.user = User(id: userId, name: "User \(userId)")
+    }
+    
+    func dismiss() {
+        coordinator?.pop()
     }
 }

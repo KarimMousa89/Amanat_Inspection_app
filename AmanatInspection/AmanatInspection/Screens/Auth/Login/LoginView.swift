@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LoginView<ViewModel: LoginViewModel>: View {
-    @Environment(\.loginNavigator) var loginHandler: any LoginNavigating
+    @Environment(\.loginNavigator) var loginHandler
     
     @State var viewModel: ViewModel
     

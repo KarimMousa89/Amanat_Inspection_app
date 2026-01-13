@@ -10,9 +10,13 @@ import SwiftUI
 //Users list & Add new user
 struct SecondTabView<ViewModel: SecondTabViewModel>: View {
     @Environment(\.secondTabCoordinator) var coordinator
-    @State var viewModel: ViewModel
     
     @State private var tabBarHidden: Bool = false
+    @State var viewModel: ViewModel
+    
+    init(makeViewModel: @escaping () -> ViewModel) {
+        _viewModel = State(initialValue: makeViewModel())
+    }
     
     var body: some View {
         VStack {
@@ -21,11 +25,10 @@ struct SecondTabView<ViewModel: SecondTabViewModel>: View {
             }
         }
         .onLoad {
+            tabBarHidden = false
             viewModel.coordinator = coordinator
         }
-        .onAppear {
-            tabBarHidden = false
-        }.task {
+        .task {
             await viewModel.fetchUsers()
         }
         .toolbar(tabBarHidden ?.hidden : .visible, for: .tabBar)
