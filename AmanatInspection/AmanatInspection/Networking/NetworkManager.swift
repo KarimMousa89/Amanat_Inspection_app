@@ -6,7 +6,7 @@
 //
 import Foundation
 
-final class NetworkManager {
+struct NetworkManager {
     /// To catch the Error
     /// catch is CancellationError {
     ///     print("Request was cancelled")
@@ -26,12 +26,11 @@ final class NetworkManager {
                 // transport Error, no reposne or data
                 // not valid response HTTPURLResponse, no response or data
                 // http status outside 200..<299, response exist and data may exist
-                attempt += 1
-
-                guard let policy = request.retryPolicy else {
+                // can't construct the Auth header
+                if case NetworkError.authGenerationFailure(_) = error{
                     throw error
                 }
-
+                
                 var data: Data?
                 var response: HTTPURLResponse?
                 
@@ -40,6 +39,25 @@ final class NetworkManager {
                     data = data1
                 }
                 
+                if let trigger = request.authorizationGroup?.refreshTrigger,
+                   let coordinator = request.authorizationGroup?.refreshCoordinator,
+                   trigger.shouldRefresh(
+                        error: error,
+                        response: response,
+                        data: data
+                   ) {
+                    try await coordinator.refresh()
+                    
+                    attempt += 1
+                    continue // retry original request
+                }
+                
+                attempt += 1
+
+                guard let policy = request.retryPolicy else {
+                    throw error
+                }
+
                 if let decision = policy.shouldRetry(
                     attempt: attempt,
                     error: error,
@@ -123,7 +141,7 @@ final class NetworkManager {
 private extension NetworkManager {
     func performData(_ request: NetworkRequest) async throws(NetworkError) -> (Data, HTTPURLResponse) {
         guard var components = URLComponents(string: request.urlString) else {
-            throw .invalidURL
+            throw NetworkError.invalidURL
         }
         if let queryParams = request.queryParams, !queryParams.isEmpty {
             components.queryItems = queryParams.map {
@@ -143,6 +161,14 @@ private extension NetworkManager {
         urlRequest.timeoutInterval = request.timeoutInterval
         urlRequest.cachePolicy = .reloadIgnoringLocalCacheData
         
+        if let auth = request.authorizationGroup?.authenticator {
+            do{
+                try await auth.apply(to: &urlRequest)
+            } catch {
+                throw NetworkError.authGenerationFailure(error: error)
+            }
+        }
+        
         do {
             let (data, response) =  try await URLSession.shared.data(for: urlRequest)
             
@@ -156,7 +182,7 @@ private extension NetworkManager {
             
             return (data, response)
         } catch (let error) {
-            throw .transportFailure(error: error)
+            throw NetworkError.transportFailure(error: error)
         }
     }
 }

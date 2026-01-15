@@ -14,7 +14,7 @@ enum NetworkRequestMethod: String {
     case delete = "DELETE"
 }
 
-struct NetworkRequest {
+struct NetworkRequest: Sendable {
     var urlString: String
     var method: NetworkRequestMethod
     var timeoutInterval: TimeInterval = 10
@@ -22,6 +22,7 @@ struct NetworkRequest {
     var body: Data?
     var queryParams: [String: String]?
     var retryPolicy: RetryPolicy?
+    var authorizationGroup: AuthorizationGroup?
     
     init(urlString: String,
          method: NetworkRequestMethod,
@@ -29,7 +30,8 @@ struct NetworkRequest {
          headers: [String: String]? = nil,
          body: Data? = nil,
          queryParams: [String: String]? = nil,
-         retryPolicy: RetryPolicy? = nil) {
+         retryPolicy: RetryPolicy? = nil,
+         authorizationGroup: AuthorizationGroup? = nil) {
         self.urlString = urlString
         self.method = method
         self.headers = headers
@@ -37,5 +39,6 @@ struct NetworkRequest {
         self.timeoutInterval = timeoutInterval
         self.queryParams = queryParams
         self.retryPolicy = retryPolicy
+        self.authorizationGroup = authorizationGroup
     }
 }

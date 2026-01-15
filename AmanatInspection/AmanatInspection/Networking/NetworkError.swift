@@ -9,6 +9,7 @@ import Foundation
 
 enum NetworkError: Error {
     case invalidURL
+    case authGenerationFailure(error: Error?)
     case invalidResponse
     case invalidResponseStatus(response: HTTPURLResponse, data: Data?)
     case invalidData

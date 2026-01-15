@@ -18,7 +18,7 @@ enum ContentConsideration {
     case nonContentBasedOnly
 }
 
-protocol RetryPolicy {
+protocol RetryPolicy: Sendable {
     var contentBased: Bool { get }
     func shouldRetry(
         attempt: Int,
