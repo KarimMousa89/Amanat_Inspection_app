@@ -14,20 +14,28 @@ enum NetworkRequestMethod: String {
     case delete = "DELETE"
 }
 
-class NetworkRequest {
+struct NetworkRequest {
     var urlString: String
     var method: NetworkRequestMethod
     var timeoutInterval: TimeInterval = 10
     var headers: [String: String]?
     var body: Data?
     var queryParams: [String: String]?
+    var retryPolicy: RetryPolicy?
     
-    init(urlString: String, method: NetworkRequestMethod, timeoutInterval: TimeInterval = 10, headers: [String: String]? = nil, body: Data? = nil, queryParams: [String: String]? = nil) {
+    init(urlString: String,
+         method: NetworkRequestMethod,
+         timeoutInterval: TimeInterval = 10,
+         headers: [String: String]? = nil,
+         body: Data? = nil,
+         queryParams: [String: String]? = nil,
+         retryPolicy: RetryPolicy? = nil) {
         self.urlString = urlString
         self.method = method
         self.headers = headers
         self.body = body
         self.timeoutInterval = timeoutInterval
         self.queryParams = queryParams
+        self.retryPolicy = retryPolicy
     }
 }
