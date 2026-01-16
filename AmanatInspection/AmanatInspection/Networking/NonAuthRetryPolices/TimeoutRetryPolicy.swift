@@ -19,8 +19,8 @@ struct TimeoutRetryPolicy: RetryPolicy {
             return nil
         }
 
-        if case .transportFailure(let underlyingError) = error,
-           (underlyingError as? URLError)?.code == .timedOut {
+        if case .transportFailure(let underlyingError as URLError) = error,
+           underlyingError.code == .timedOut {
             return .retry(after: delay)
         }
 

@@ -7,6 +7,8 @@
 
 import Foundation
 import RegexBuilder
+import CryptoKit
+
 
 //@MainActor
 //func Localized(_ key: String) -> String {
@@ -52,7 +54,14 @@ extension String {
                 )
             }
         }
-
+        
         return self.wholeMatch(of: emailRegex) !=  nil
+    }
+    
+    // String input
+    func sha256Base64() -> String {
+        let data = Data(self.utf8)
+        let hashed = SHA256.hash(data: data)
+        return Data(hashed).base64EncodedString()
     }
 }

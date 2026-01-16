@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BackendTokenRefresher: TokenRefresher {
+struct BackendTokenRefresher: TokenRefresher/*, @unchecked Sendable*/ {
     let refreshRequest: NetworkRequest
 
     init(refreshRequest: NetworkRequest) {
@@ -15,8 +15,6 @@ struct BackendTokenRefresher: TokenRefresher {
     }
 
     func refreshToken() async throws {
-        _ = try await NetworkManager().requestData(refreshRequest)
+        _ = try await NetworkManagerImp().requestData(refreshRequest)
     }
 }
-
-//extension BackendTokenRefresher: @unchecked Sendable{}

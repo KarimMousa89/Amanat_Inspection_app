@@ -14,4 +14,10 @@ extension Data {
         let hmac = HMAC<SHA256>.authenticationCode(for: self, using: key)
         return Data(hmac)
     }
+    
+    // Data input
+    func sha256Base64() -> String {
+        let hashed = SHA256.hash(data: self)
+        return Data(hashed).base64EncodedString()
+    }
 }

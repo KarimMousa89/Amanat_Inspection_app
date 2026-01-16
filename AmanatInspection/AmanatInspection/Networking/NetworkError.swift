@@ -14,5 +14,6 @@ enum NetworkError: Error {
     case invalidResponseStatus(response: HTTPURLResponse, data: Data?)
     case invalidData
     case decodingFailure(error: Error)
+    case sslPinningFailure
     case transportFailure(error: Error)//.. couldn't reach the server
 }

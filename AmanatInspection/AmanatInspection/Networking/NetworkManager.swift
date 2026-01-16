@@ -93,6 +93,7 @@ private extension NetworkManager {
                 return (result.0, result.1)
             } catch let error {
                 // transport Error, no reposne or data
+                // sslpinning Error, no reposne or data
                 // not valid response HTTPURLResponse, no response or data
                 // http status outside 200..<299, response exist and data may exist
                 // can't construct the Auth header
@@ -175,7 +176,7 @@ private extension NetworkManager {
         }
         
         do {
-            let (data, response) =  try await URLSession.shared.data(for: urlRequest)
+            let (data, response) =  try await URLSessionProvider().session(for: request).data(for: urlRequest)
             
             guard let response = response as? HTTPURLResponse else {
                 throw NetworkError.invalidResponse
@@ -187,6 +188,9 @@ private extension NetworkManager {
             
             return (data, response)
         } catch (let error) {
+            if let urlError = error as? URLError, urlError.code == .cancelled {
+                throw NetworkError.sslPinningFailure
+            }
             throw NetworkError.transportFailure(error: error)
         }
     }

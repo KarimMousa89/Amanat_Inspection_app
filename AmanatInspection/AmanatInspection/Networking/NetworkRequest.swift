@@ -23,6 +23,7 @@ struct NetworkRequest: Sendable {
     var queryParams: [String: String]?
     var retryPolicy: RetryPolicy?
     var authorizationGroup: AuthorizationGroup?
+    let serverTrustEvaluator: ServerTrustEvaluating?
     
     init(urlString: String,
          method: NetworkRequestMethod,
@@ -31,7 +32,8 @@ struct NetworkRequest: Sendable {
          body: Data? = nil,
          queryParams: [String: String]? = nil,
          retryPolicy: RetryPolicy? = nil,
-         authorizationGroup: AuthorizationGroup? = nil) {
+         authorizationGroup: AuthorizationGroup? = nil,
+         serverTrustEvaluator: ServerTrustEvaluating? = nil) {
         self.urlString = urlString
         self.method = method
         self.headers = headers
@@ -40,5 +42,6 @@ struct NetworkRequest: Sendable {
         self.queryParams = queryParams
         self.retryPolicy = retryPolicy
         self.authorizationGroup = authorizationGroup
+        self.serverTrustEvaluator = serverTrustEvaluator
     }
 }
