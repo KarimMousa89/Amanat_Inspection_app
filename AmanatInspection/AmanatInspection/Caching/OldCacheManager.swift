@@ -7,9 +7,9 @@
 
 import Foundation
 
-actor CacheManager {
+actor OldCacheManager {
     
-    let shared = CacheManager()
+    let shared = OldCacheManager()
     
     private let userDefaults: UserDefaults
     private var memoryCache: [String: Any] = [:]
