@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class GenericEntity: PersistentModel {
+final class GenericEntity {
     @Attribute(.unique) var key: String
     var data: Data
     

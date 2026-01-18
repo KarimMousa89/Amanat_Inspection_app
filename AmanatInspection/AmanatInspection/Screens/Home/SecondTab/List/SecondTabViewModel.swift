@@ -9,16 +9,11 @@ import Foundation
 import SwiftData
 
 struct User: Identifiable, Hashable {
-//    typealias EntityType = UserEntity
     var id = UUID().uuidString
     let name: String
 }
 
 extension User: EntityConvertable {
-//    static var entityType: UserEntity.Type {
-//        UserEntity.self
-//    }
-   
     func makeEntity() -> any PersistentModel {
         UserEntity(id: UUID(uuidString: id) ?? UUID(), name: name)
     }

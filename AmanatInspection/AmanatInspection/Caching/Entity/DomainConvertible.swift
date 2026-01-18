@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-protocol DomainConvertible: PersistentModel {
+protocol DomainConvertible {
     associatedtype Domain
     var id: UUID { get }
     func toDomain() -> Domain
