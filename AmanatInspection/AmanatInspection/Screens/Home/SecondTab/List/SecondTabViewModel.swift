@@ -13,12 +13,6 @@ struct User: Identifiable, Hashable {
     let name: String
 }
 
-extension User: EntityConvertable {
-    func makeEntity() -> any PersistentModel {
-        UserEntity(id: UUID(uuidString: id) ?? UUID(), name: name)
-    }
-}
-
 @MainActor
 protocol SecondTabViewModel: ObservableObject {
     var users: [String: [User]] { get set }

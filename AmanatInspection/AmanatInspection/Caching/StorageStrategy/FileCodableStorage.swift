@@ -29,7 +29,7 @@ extension FileCodableStorage: StorageStrategy{
         }
     }
     
-    func get<T>(_ type: T.Type?, idOrKey: String?) -> [T]? {
+    func get<T>(_ type: T.Type, idOrKey: String?) -> [T]? {
         guard let idOrKey,
               let decodableType = type as? Decodable.Type,
               let data = store[idOrKey],

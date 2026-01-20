@@ -10,11 +10,11 @@ import SwiftData
 
 @Model
 final class GenericEntity {
-    @Attribute(.unique) var key: String
+    @Attribute(.unique) var id: String
     var data: Data
     
-    init(key: String, data: Data) {
-        self.key = key
+    init(id: String, data: Data) {
+        self.id = id
         self.data = data
     }
 }

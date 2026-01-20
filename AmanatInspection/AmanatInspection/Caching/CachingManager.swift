@@ -43,7 +43,7 @@ private extension CachingManagerImp {
     private func setOnDisk<T: Codable>(_ value: T?, forKey key: String) {
         // Encode, Encrypt, base64 String
         do {
-            var data = try JSONEncoder().encode(value)
+            let data = try JSONEncoder().encode(value)
             var allDict = loadAllFromDisk()
             allDict[key] = data.base64EncodedString()
             saveAllToDisk(dict: allDict)
@@ -56,12 +56,12 @@ private extension CachingManagerImp {
         let allDict = loadAllFromDisk()
         // Data from base64 String, Decrypt, Decode
         guard let base64String = allDict[key] as? String,
-              var data = Data(base64Encoded: base64String) else {
+              let data = Data(base64Encoded: base64String) else {
             return nil
         }
         
         do {
-            let value = try? JSONDecoder().decode(T.self, from: data)
+            let value = try JSONDecoder().decode(T.self, from: data)
             return value
         } catch let error{
             debugPrint("failed to get data: \(error)")

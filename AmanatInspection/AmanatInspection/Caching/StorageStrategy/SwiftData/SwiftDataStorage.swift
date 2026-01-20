@@ -19,29 +19,28 @@ class SwiftDataStorage: StorageStrategy{
         self.domainTypes = domainTypes
     }
 
-    func save<T>(_ value: T, idOrKey: String?) {
-        if let domain = value as? any EntityConvertable {
-            // DomainModel -> use Entity
-            context.insert(domain.makeEntity())
-        } else if let codable = value as? Codable {
-            // Primitive / Codable -> GenericEntity
-            guard let key = idOrKey,
-                  let data = try? JSONEncoder().encode(codable) else { return }
-            if let entity = getEntities(type: GenericEntity.self, predicate: #Predicate { $0.key == key })?.first {
-                entity.data = data
-            } else {
-                let entity = GenericEntity(key: key, data: data)
-                context.insert(entity)
-            }
+    func save<T>(_ value: T, idOrKey: String?) {}
+    func save<T>(_ value: T, idOrKey: String?) where T: Codable {
+        guard let idOrKey,
+              let data = try? JSONEncoder().encode(value) else { return }
+        if let entity = getEntities(type: GenericEntity.self, predicate: #Predicate { $0.id == idOrKey })?.first {
+            entity.data = data
         } else {
-            debugPrint("Type \(T.self) is not supported")
+            let entity = GenericEntity(id: idOrKey, data: data)
+            context.insert(entity)
         }
     }
+    func save<T>(_ value: T, idOrKey: String?) where T: EntityConvertable {
+        context.insert(value.makeEntity())
+    }
     
-    func get<T>(_ type: T.Type?, idOrKey: String?) -> [T]? { return nil }
-    func get<T>(_ type: T.Type?, idOrKey: String?) -> [T]? where T: Decodable{
-        if let type,
-           var entities = getEntities(type: GenericEntity.self, predicate: #Predicate {idOrKey == nil || $0.key == idOrKey!}),
+    func get<T>(_ type: T.Type, idOrKey: String?) -> [T]? { return nil }
+    func get<T>(_ type: T.Type, idOrKey: String?) -> [T]? where T: Decodable{
+        var predicate: Predicate<GenericEntity>? = nil
+        if let idOrKey {
+            predicate = #Predicate {$0.id == idOrKey}
+        }
+        if var entities = getEntities(type: GenericEntity.self, predicate: predicate),
            !entities.isEmpty {
             
             if entities.count > 1,
@@ -56,29 +55,41 @@ class SwiftDataStorage: StorageStrategy{
         return nil
     }
     func get<T>(_ type: T.Type, idOrKey: String?) -> [T]? where T: DomainType {
-        if let entities = getEntities(type: type, predicate: #Predicate { idOrKey == nil || $0.id.uuidString == idOrKey!}),
+        var predicate: Predicate<T>? = nil
+        if let idOrKey {
+            predicate = #Predicate { $0.id.uuidString == idOrKey}
+        }
+        if var entities = getEntities(type: type, predicate: predicate),
            !entities.isEmpty {
             
             if entities.count > 1,
                let idOrKey,
                let match = entities.first(where: { "\($0.id)" == idOrKey }) {
-                return [match] as? [T]
+                entities = [match]
             }
-            return entities
+            return entities.map({ $0.toDomain() as! T}) 
         }
         return nil
     }
     
     func remove<T>(_ type: T.Type?, idOrKey: String?) {}
     func remove<T>(_ type: T.Type?, idOrKey: String?) where T: Decodable{
-        if let entities = getEntities(type: GenericEntity.self, predicate: #Predicate { idOrKey == nil || $0.key == idOrKey!}),
+        var predicate: Predicate<GenericEntity>? = nil
+        if let idOrKey {
+            predicate = #Predicate { $0.id == idOrKey}
+        }
+        if let entities = getEntities(type: GenericEntity.self, predicate: predicate),
                   !entities.isEmpty {
             entities.forEach { context.delete($0) }
         }
     }
     func remove<T>(_ type: T.Type?, idOrKey: String?) where T: DomainType{
+        var predicate: Predicate<T>? = nil
+        if let idOrKey {
+            predicate = #Predicate { $0.id.uuidString == idOrKey}
+        }
         if let type,
-           let entities: [T] = getEntities(type: type, idOrKey: idOrKey),
+           let entities: [T] = getEntities(type: type, predicate: predicate),
            !entities.isEmpty {
             entities.forEach { context.delete($0) }
         }
@@ -105,8 +116,8 @@ private extension SwiftDataStorage {
         return try? context.fetch(descriptor)
     }
     
-    func getEntities<T>(type: T.Type, idOrKey: String?) -> [T]? where T: DomainType{
-        let descriptor = FetchDescriptor<T>(predicate:  #Predicate { idOrKey == nil || $0.id.uuidString == idOrKey!})
-        return try? context.fetch(descriptor)
-    }
+//    func getEntities<T>(type: T.Type, idOrKey: String?) -> [T]? where T: DomainType{
+//        let descriptor = FetchDescriptor<T>(predicate:  #Predicate { idOrKey == nil || $0.id.uuidString == idOrKey!})
+//        return try? context.fetch(descriptor)
+//    }
 }
