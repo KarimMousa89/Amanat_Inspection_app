@@ -13,21 +13,23 @@ actor NewCachingManager {
     init(storage: any StorageStrategy) {
         self.storage = storage
     }
-    
-    func save<T>(_ value: T, idOrKey: String?) {
-        storage.save(value, idOrKey: idOrKey)
+}
+
+extension NewCachingManager: StorageStrategy {
+    func save<T>(_ value: T, idOrKey: String?) async where T : Sendable {
+        await storage.save(value, idOrKey: idOrKey)
     }
     
-    func get<T>(_ type: T.Type, idOrKey: String?) -> [T]? {
-        storage.get(type, idOrKey: idOrKey)
+    func get<T>(_ type: T.Type, idOrKey: String?) async -> [T]? where T : Sendable {
+        await storage.get(type, idOrKey: idOrKey)
     }
     
-    func remove<T>(_ value: T?, idOrKey: String?) {
-        storage.remove(type(of: value), idOrKey: idOrKey)
+    func remove<T>(_ type: T.Type?, idOrKey: String?) async {
+        await storage.remove(type, idOrKey: idOrKey)
     }
     
-    func clearAll() {
-        storage.clearAll()
+    func clearAll() async {
+        await storage.clearAll()
     }
 }
 

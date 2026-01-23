@@ -7,9 +7,9 @@
 
 import Foundation
 
-protocol StorageStrategy {
-    func save<T>(_ value: T, idOrKey: String?) //TODO: return bool or throw if wrong inpute
-    func get<T>(_ type: T.Type, idOrKey: String?) -> [T]? //TODO: throw if wrong inpute
-    func remove<T>(_ type: T.Type?, idOrKey: String?)
-    func clearAll()
+protocol StorageStrategy: Actor {
+    func save<T: Sendable>(_ value: T, idOrKey: String?) async //TODO: return bool or throw if wrong inpute
+    func get<T: Sendable>(_ type: T.Type, idOrKey: String?) async -> [T]? //TODO: throw if wrong inpute
+    func remove<T>(_ type: T.Type?, idOrKey: String?) async
+    func clearAll() async 
 }

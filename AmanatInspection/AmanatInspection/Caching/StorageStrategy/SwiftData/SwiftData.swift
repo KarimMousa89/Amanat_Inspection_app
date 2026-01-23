@@ -8,12 +8,17 @@
 import Foundation
 import SwiftData
 /// PersistentModel
-protocol DomainConvertible {
+protocol EntityWithDomainConvertible: PersistentModel {
     associatedtype Domain
-    var id: UUID { get }
+    var id: String { get }
     func toDomain() -> Domain
 }
+
 /// Domain
-protocol EntityConvertable {
-    func makeEntity() -> any PersistentModel
+protocol DomainWithEntityConvertable {
+    associatedtype UnderlyingEntity: EntityWithDomainConvertible
+        where UnderlyingEntity.Domain == Self
+
+    static var entityType: UnderlyingEntity.Type { get }
+    func makeEntity() -> UnderlyingEntity
 }

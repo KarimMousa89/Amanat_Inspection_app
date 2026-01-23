@@ -8,9 +8,15 @@
 import Foundation
 import SwiftData
 
-extension User: EntityConvertable {
-    func makeEntity() -> any PersistentModel {
-        UserEntity(id: UUID(uuidString: id) ?? UUID(), name: name)
+extension User: DomainWithEntityConvertable {
+    typealias UnderlyingEntity = UserEntity
+    
+    static var entityType: UserEntity.Type {
+        UnderlyingEntity.self
+    }
+    
+    func makeEntity() -> UnderlyingEntity {
+        UserEntity(id: id, name: name)
     }
 }
 
@@ -18,17 +24,17 @@ extension User: EntityConvertable {
 final class UserEntity {
     typealias Domain = User
     
-    @Attribute(.unique) var id: UUID
+    @Attribute(.unique) var id: String
     var name: String
     
-    init(id: UUID, name: String) {
+    init(id: String, name: String) {
         self.id = id
         self.name = name
     }
 }
 
-extension UserEntity: DomainConvertible {
+extension UserEntity: EntityWithDomainConvertible {
     func toDomain() -> User {
-        return User(id: id.uuidString, name: name)
+        return User(id: id, name: name)
     }
 }

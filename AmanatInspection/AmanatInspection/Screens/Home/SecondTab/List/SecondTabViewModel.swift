@@ -9,8 +9,13 @@ import Foundation
 import SwiftData
 
 struct User: Identifiable, Hashable {
-    var id = UUID().uuidString
+    var id: String
     let name: String
+    
+    init(id: String, name: String) {
+        self.id = id
+        self.name = name
+    }
 }
 
 @MainActor
@@ -32,19 +37,19 @@ class SecondTabViewModelImpl: SecondTabViewModel {
         } catch {
             
         }
-            self.users = ["K": [User(name: "Kamal"), User(id: "5", name: "Karim"), User(name: "Karam")],
-                          "Z": [User(id: "12", name: "Zozo"), User(name: "Zeinab"), User(name: "Zalabya")],
-                          "M": [User(name: "Marwa"), User(name: "Mero"), User(id: "8", name: "Muhamed")],
-                          "N": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "R": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "O": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "P": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "A": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "B": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "C": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "D": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "E": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")],
-                          "F": [User(name: "Marwa"), User(name: "Mero"), User(name: "Muhamed")]]
+            self.users = ["K": [User(id: "1", name: "Kamal"), User(id: "5", name: "Karim"), User(id: "1", name: "Karam")],
+                          "Z": [User(id: "12", name: "Zozo"), User(id: "1", name: "Zeinab"), User(id: "1", name: "Zalabya")],
+                          "M": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "8", name: "Muhamed")],
+                          "N": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "R": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "O": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "P": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "A": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "B": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "C": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "D": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "E": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")],
+                          "F": [User(id: "1", name: "Marwa"), User(id: "1", name: "Mero"), User(id: "1", name: "Muhamed")]]
             
             if let pendingSelectedUserId = self.pendingSelectedUserId,
                let completion = self.pendingSelectedUserIdCompletion {

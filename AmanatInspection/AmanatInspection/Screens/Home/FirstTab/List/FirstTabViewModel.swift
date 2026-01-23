@@ -8,7 +8,7 @@
 import Foundation
 
 struct Book: Identifiable, Hashable {
-    var id = UUID()
+    var id: String
     let title: String
 }
 
@@ -30,18 +30,18 @@ class FirstTabViewModelImpl: FirstTabViewModel {
             
         }
         
-        self.books = ["K": [Book(title: "Karim"), Book(title: "Kamal"), Book(title: "Karam")],
-                      "Z": [Book(title: "Zozo"), Book(title: "Zeinab"), Book(title: "Zalabya")],
-                      "M": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "N": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "R": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "O": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "P": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "A": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "B": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "C": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "D": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "E": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")],
-                      "F": [Book(title: "Marwa"), Book(title: "Mero"), Book(title: "Muhamed")]]
+        self.books = ["K": [Book(id: "1", title: "Karim"), Book(id: "1", title: "Kamal"), Book(id: "1", title: "Karam")],
+                      "Z": [Book(id: "1", title: "Zozo"), Book(id: "1", title: "Zeinab"), Book(id: "1", title: "Zalabya")],
+                      "M": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "N": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "R": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "O": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "P": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "A": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "B": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "C": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "D": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "E": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")],
+                      "F": [Book(id: "1", title: "Marwa"), Book(id: "1", title: "Mero"), Book(id: "1", title: "Muhamed")]]
     }
 }
