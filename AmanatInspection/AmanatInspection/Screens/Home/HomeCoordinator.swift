@@ -69,7 +69,7 @@ final class HomeCoordinator: TabCoordinating {
         }
     }
     
-    func perform(on tab: TabType, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+    func perform(on tab: TabType, action: NavigationAction<HomeCrossTabRoute>, switchTab: Bool) {
         if switchTab {
             self.selectedTab = tab
         }
@@ -100,7 +100,7 @@ private extension HomeCoordinator{
         case second(SecondTabRoute)
     }
 
-    private func resolve( tab: TabType, route: CrossTabRoute) -> ResolvedCrossTabRoute? {
+    private func resolve( tab: TabType, route: HomeCrossTabRoute) -> ResolvedCrossTabRoute? {
         switch (tab, route) {
         case (.first, .bookDetais(let book)):
             return .first(
@@ -118,7 +118,7 @@ private extension HomeCoordinator{
         }
     }
     
-    private func perform(_ action: NavigationAction<CrossTabRoute>, with resolved: ResolvedCrossTabRoute) {
+    private func perform(_ action: NavigationAction<HomeCrossTabRoute>, with resolved: ResolvedCrossTabRoute) {
         switch (action, resolved) {
         case (.push, .first(let route)):
             firstTabCoordinator.perform(.push(route))
@@ -138,7 +138,7 @@ private extension HomeCoordinator{
     }
 }
 
-enum CrossTabRoute: Hashable {
+enum HomeCrossTabRoute: Hashable {
     case userDetails(user: User)
     case bookDetais(book: Book)
 }

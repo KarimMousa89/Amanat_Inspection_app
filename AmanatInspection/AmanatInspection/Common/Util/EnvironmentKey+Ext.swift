@@ -57,11 +57,11 @@ final class TempLoginNavigator: LoginNavigating {
 
 // MARK: - HomeCoordinatorEnvironmentKey
 private struct HomeCoordinatorKey: @MainActor EnvironmentKey {
-    @MainActor static let defaultValue: AnyTabCoordinator<HomeTab> = AnyTabCoordinator(HomeCoordinator(navigator: TempHomeNavigator()))
+    @MainActor static let defaultValue: AnyTabCoordinator<HomeTab, HomeCrossTabRoute> = AnyTabCoordinator(HomeCoordinator(navigator: TempHomeNavigator()))
 }
 
 extension EnvironmentValues {
-    @MainActor var homeCoordinator: AnyTabCoordinator<HomeTab> {
+    @MainActor var homeCoordinator: AnyTabCoordinator<HomeTab, HomeCrossTabRoute> {
         get { self[HomeCoordinatorKey.self] }
         set { self[HomeCoordinatorKey.self] = newValue }
     }

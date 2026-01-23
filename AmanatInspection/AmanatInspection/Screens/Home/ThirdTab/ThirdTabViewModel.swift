@@ -9,7 +9,7 @@ import Foundation
 
 @MainActor
 protocol ThirdTabViewModel {
-    var coordinator: (AnyTabCoordinator<HomeTab>)? {get set}
+    var coordinator: (AnyTabCoordinator<HomeTab, HomeCrossTabRoute>)? {get set}
     var navigator: (any HomeNavigating)? {get set}
     func didTapLogout()
     func didTapDeeplinkSimulation()
@@ -18,7 +18,7 @@ protocol ThirdTabViewModel {
 
 @MainActor @Observable
 final class ThirdTabViewModelImpl: ThirdTabViewModel {
-    var coordinator: (AnyTabCoordinator<HomeTab>)? = nil
+    var coordinator: (AnyTabCoordinator<HomeTab, HomeCrossTabRoute>)? = nil
     var navigator: (any HomeNavigating)? = nil
     
     func didTapDeeplinkSimulation() {

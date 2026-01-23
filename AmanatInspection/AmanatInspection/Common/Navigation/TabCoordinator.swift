@@ -11,6 +11,7 @@ import SwiftUI
 @MainActor
 protocol TabCoordinator: Coordinator {
     associatedtype TabType: Hashable
+    associatedtype CrossTabRoute: Hashable
     var selectedTab: TabType {get set}
     func perform(on tab: TabType, action: NavigationAction<CrossTabRoute>, switchTab: Bool)
 }
@@ -18,7 +19,7 @@ protocol TabCoordinator: Coordinator {
 typealias TabCoordinating = TabCoordinator&URLComponentsHandler
 
 @MainActor @Observable
-final class AnyTabCoordinator<Tab: Hashable>: TabCoordinating {
+final class AnyTabCoordinator<Tab: Hashable, CrossTabRoute: Hashable>: TabCoordinating {
     
     // This is the concrete type the View will bind to.
     // It is NOT generic.
@@ -38,7 +39,7 @@ final class AnyTabCoordinator<Tab: Hashable>: TabCoordinating {
 
     // 2. A generic subclass of the box that captures the concrete coordinator type.
     @MainActor
-    private class TabCoordinatorBox<C: TabCoordinating>: BaseTabCoordinatorBox where C.TabType == Tab {
+    private class TabCoordinatorBox<C: TabCoordinating>: BaseTabCoordinatorBox where C.TabType == Tab, C.CrossTabRoute == CrossTabRoute {
         private let wrapped: C // Holds the REAL coordinator (e.g., LoginCoordinator or MockLoginCoordinator)
 
         init(_ coordinator: C) {
@@ -67,7 +68,7 @@ final class AnyTabCoordinator<Tab: Hashable>: TabCoordinating {
 
     private let box: BaseTabCoordinatorBox
 
-    init<C: TabCoordinating>(_ coordinator: C) where C.TabType == Tab {
+    init<C: TabCoordinating>(_ coordinator: C) where C.TabType == Tab, C.CrossTabRoute == CrossTabRoute {
         self.box = TabCoordinatorBox(coordinator)
     }
 
