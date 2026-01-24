@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-enum NavigationAction<Route> {
+enum NavigationModalAction<Route> {
     case push(Route)
     case present(Route)
     case pop
@@ -18,7 +18,7 @@ enum NavigationAction<Route> {
     case reset(Route)
 }
 
-extension NavigationAction {
+extension NavigationModalAction {
     var route: Route? {
         switch self {
         case .push(let route),
@@ -31,8 +31,8 @@ extension NavigationAction {
     }
 }
 
-extension NavigationAction {
-    func eraseRoute<NewRoute>() -> NavigationAction<NewRoute>? {
+extension NavigationModalAction {
+    func eraseRoute<NewRoute>() -> NavigationModalAction<NewRoute>? {
         switch self {
         case .pop:
             return .pop
@@ -87,31 +87,12 @@ extension NavigationCoordinator {
 }
 
 @MainActor
-protocol ModalCoordinator: Coordinator{
-    associatedtype Route: Hashable
-    // TODO: define ModalCoordinator as decorator for the coordinator, so we add presentation cabability for any navigation stack or tab view
-    var modalScene: Route? { get set}
-    func presentModal(_ scene: Route)
-    func dismissModal()
-}
-
-extension ModalCoordinator {
-    func presentModal(_ scene: Route) {
-        modalScene = scene
-    }
-    
-    func dismissModal() {
-        modalScene = nil
-    }
-}
-
-@MainActor
 protocol NavigationModalCoordinating: NavigationCoordinator, ModalCoordinator, URLComponentsHandler {
-    func perform(_ action: NavigationAction<Route>)
+    func perform(_ action: NavigationModalAction<Route>)
 }
 
 extension NavigationModalCoordinating {
-    func perform(_ action: NavigationAction<Route>) {
+    func perform(_ action: NavigationModalAction<Route>) {
         switch action {
         case .push(let destination):
             push(destination)

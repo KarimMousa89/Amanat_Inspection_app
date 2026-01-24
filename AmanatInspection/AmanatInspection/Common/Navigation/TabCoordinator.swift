@@ -13,7 +13,7 @@ protocol TabCoordinator: Coordinator {
     associatedtype TabType: Hashable
     associatedtype CrossTabRoute: Hashable
     var selectedTab: TabType {get set}
-    func perform(on tab: TabType, action: NavigationAction<CrossTabRoute>, switchTab: Bool)
+    func perform(on tab: TabType, action: NavigationModalAction<CrossTabRoute>, switchTab: Bool)
 }
 
 typealias TabCoordinating = TabCoordinator&URLComponentsHandler
@@ -32,7 +32,7 @@ final class AnyTabCoordinator<Tab: Hashable, CrossTabRoute: Hashable>: TabCoordi
         var selectedTab: Tab { get { fatalError() } set { fatalError() } }
         func view() -> AnyView { fatalError() }
         func handleURLComponents(_ components: URLComponents) { fatalError() }
-        func perform(on tab: Tab, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+        func perform(on tab: Tab, action: NavigationModalAction<CrossTabRoute>, switchTab: Bool) {
             fatalError()
         }
     }
@@ -61,7 +61,7 @@ final class AnyTabCoordinator<Tab: Hashable, CrossTabRoute: Hashable>: TabCoordi
             wrapped.handleURLComponents(components)
         }
         
-        override func perform(on tab: Tab, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+        override func perform(on tab: Tab, action: NavigationModalAction<CrossTabRoute>, switchTab: Bool) {
             wrapped.perform(on: tab, action: action, switchTab: switchTab)
         }
     }
@@ -85,7 +85,7 @@ final class AnyTabCoordinator<Tab: Hashable, CrossTabRoute: Hashable>: TabCoordi
         box.view()
     }
     
-    func perform(on tab: Tab, action: NavigationAction<CrossTabRoute>, switchTab: Bool) {
+    func perform(on tab: Tab, action: NavigationModalAction<CrossTabRoute>, switchTab: Bool) {
         box.perform(on: tab, action: action, switchTab: switchTab)
     }
 }

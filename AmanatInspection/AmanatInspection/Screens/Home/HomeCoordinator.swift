@@ -69,7 +69,7 @@ final class HomeCoordinator: TabCoordinating {
         }
     }
     
-    func perform(on tab: TabType, action: NavigationAction<HomeCrossTabRoute>, switchTab: Bool) {
+    func perform(on tab: TabType, action: NavigationModalAction<HomeCrossTabRoute>, switchTab: Bool) {
         if switchTab {
             self.selectedTab = tab
         }
@@ -77,10 +77,10 @@ final class HomeCoordinator: TabCoordinating {
         guard let route = action.route else {
             switch tab {
             case .first:
-                guard let erasedAction: NavigationAction<FirstTabRoute> = action.eraseRoute() else { return }
+                guard let erasedAction: NavigationModalAction<FirstTabRoute> = action.eraseRoute() else { return }
                 firstTabCoordinator.perform(erasedAction)
             case .second:
-                guard let erasedAction: NavigationAction<SecondTabRoute> = action.eraseRoute() else { return }
+                guard let erasedAction: NavigationModalAction<SecondTabRoute> = action.eraseRoute() else { return }
                 secondTabCoordinator.perform(erasedAction)
             default:
                 break
@@ -118,7 +118,7 @@ private extension HomeCoordinator{
         }
     }
     
-    private func perform(_ action: NavigationAction<HomeCrossTabRoute>, with resolved: ResolvedCrossTabRoute) {
+    private func perform(_ action: NavigationModalAction<HomeCrossTabRoute>, with resolved: ResolvedCrossTabRoute) {
         switch (action, resolved) {
         case (.push, .first(let route)):
             firstTabCoordinator.perform(.push(route))
