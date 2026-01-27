@@ -46,7 +46,7 @@ struct NetworkManagerImp: NetworkManager {
                 
                 if let decision = policy.shouldRetry(
                     attempt: executions,
-                    error: NetworkError.decodingFailure(error: error),
+                    error: NetworkError.invalidResponse(httpCode: nil, response: nil, data:nil, error: error),
                     response: response,
                     data: data,
                     considerContent : .contentBasedOnly
@@ -59,7 +59,7 @@ struct NetworkManagerImp: NetworkManager {
                         continue
                     }
                 } else {
-                    throw NetworkError.decodingFailure(error: error)
+                    throw NetworkError.invalidResponse(httpCode: nil, response: nil, data:nil, error: error)
                 }
             }
         }
@@ -97,27 +97,29 @@ private extension NetworkManager {
                 // not valid response HTTPURLResponse, no response or data
                 // http status outside 200..<299, response exist and data may exist
                 // can't construct the Auth header
-                if case NetworkError.authGenerationFailure(_) = error{
+                // TODO: check if more errors coming here and document it
+                if case NetworkError.invalidRequest(error: _) = error{
                     throw error
                 }
                 
                 var data: Data?
                 var response: HTTPURLResponse?
                 
-                if case NetworkError.invalidResponseStatus(let response1, let data1) = error{
+                if case NetworkError.invalidResponse(_, let response1, let data1, _) = error{
                     response = response1
                     data = data1
                 }
                 
                 if let trigger = request.authorizationGroup?.refreshTrigger,
-                   let coordinator = request.authorizationGroup?.refreshCoordinator,
-                   trigger.shouldRefresh(
-                        error: error,
-                        response: response,
-                        data: data
-                   ) {
-                    try await coordinator.refresh()
-                    continue // retry original request
+                   let coordinator = request.authorizationGroup?.refreshCoordinator{
+                    let (shouldRetry, authIssueExist) = trigger.shouldRefresh(attempt: executions, error: error, response: response, data: data)
+                    
+                    if shouldRetry {
+                        try await coordinator.refresh()
+                        continue // retry original request
+                    } else if authIssueExist {// auth issue exist but can't retry because for example i exceeded number of allowes attempts
+                        throw NetworkError.autherizationFailed
+                    }
                 }
 
                 guard let policy = request.retryPolicy else {
@@ -146,51 +148,40 @@ private extension NetworkManager {
     }
     
     func performData(_ request: NetworkRequest) async throws(NetworkError) -> (Data, HTTPURLResponse) {
-        guard var components = URLComponents(string: request.urlString) else {
-            throw NetworkError.invalidURL
-        }
-        if let queryParams = request.queryParams, !queryParams.isEmpty {
-            components.queryItems = queryParams.map {
-                URLQueryItem(name: $0.key, value: $0.value)
-            }
-        }
-        guard let url = components.url else {
-            throw NetworkError.invalidURL
-        }
         
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = request.method.rawValue
-        if let headers = request.headers {
-            urlRequest.allHTTPHeaderFields = headers
-        }
-        urlRequest.httpBody = request.body
-        urlRequest.timeoutInterval = request.timeoutInterval
-        urlRequest.cachePolicy = .reloadIgnoringLocalCacheData
-        
-        if let auth = request.authorizationGroup?.authenticator {
-            do{
-                try await auth.apply(to: &urlRequest)
-            } catch {
-                throw NetworkError.authGenerationFailure(error: error)
-            }
-        }
-        
+        let urlRequest = try await request.buildURLRequest()
+                
         do {
             let (data, response) =  try await URLSessionProvider().session(for: request).data(for: urlRequest)
             
             guard let response = response as? HTTPURLResponse else {
-                throw NetworkError.invalidResponse
+                throw NetworkError.invalidResponse(httpCode: nil, response: nil, data: nil, error: nil)
             }
-            
-            guard (200...299).contains(response.statusCode) else {
-                throw NetworkError.invalidResponseStatus(response: response, data: data)
+            let statusCode = response.statusCode
+            guard (200...299).contains(statusCode) else {
+                if statusCode == 404 {
+                    throw NetworkError.noDataFound
+                }
+                throw NetworkError.invalidResponse(httpCode: statusCode, response: response, data: data, error: nil)
             }
-            
             return (data, response)
         } catch (let error) {
-            if let urlError = error as? URLError, urlError.code == .cancelled {
-                throw NetworkError.sslPinningFailure
+            if let error = error as? NetworkError {
+                throw error
+            } else if let urlError = error as? URLError {
+                switch urlError.code {
+                case .cancelled:// SSL pinning failed
+                    throw NetworkError.autherizationFailed
+                case .notConnectedToInternet,
+                        .networkConnectionLost:
+                    throw NetworkError.noInternetConnection
+                case .timedOut:
+                    throw NetworkError.requestTimeout
+                default:
+                    break
+                }
             }
+            print("Network Transport Error: \(error.localizedDescription)")
             throw NetworkError.transportFailure(error: error)
         }
     }

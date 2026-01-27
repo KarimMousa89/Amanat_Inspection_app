@@ -13,10 +13,11 @@ protocol AuthenticationStrategy: Sendable {
 
 protocol TokenRefreshTrigger: Sendable {
     func shouldRefresh(
+        attempt: Int,
         error: NetworkError?,
         response: HTTPURLResponse?,
         data: Data?
-    ) -> Bool
+    ) -> (Bool, Bool)
 }
 
 protocol TokenRefresher: Sendable {

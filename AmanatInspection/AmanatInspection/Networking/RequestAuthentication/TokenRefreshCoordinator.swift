@@ -11,7 +11,6 @@ actor TokenRefreshCoordinator {
     private let refresher: TokenRefresher
     private var isRefreshing = false
     private var waiters: [CheckedContinuation<Void, Error>] = []
-
     
     init(refresher: TokenRefresher) {
         self.refresher = refresher

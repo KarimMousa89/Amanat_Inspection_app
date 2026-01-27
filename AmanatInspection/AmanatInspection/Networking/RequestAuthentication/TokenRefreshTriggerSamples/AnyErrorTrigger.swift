@@ -9,10 +9,11 @@ import Foundation
 
 struct AnyErrorTrigger: TokenRefreshTrigger {
     func shouldRefresh(
+        attempt: Int,
         error: NetworkError?,
         response: HTTPURLResponse?,
         data: Data?
-    ) -> Bool {
-        error != nil
+    ) -> (Bool, Bool) {
+        (error != nil, true)
     }
 }

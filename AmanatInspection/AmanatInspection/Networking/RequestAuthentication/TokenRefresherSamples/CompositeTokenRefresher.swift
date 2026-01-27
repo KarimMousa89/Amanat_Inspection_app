@@ -24,6 +24,6 @@ struct CompositeTokenRefresher: TokenRefresher {
         }
         
         // All failed
-        throw lastError ?? NetworkError.authGenerationFailure(error: nil)
+        throw lastError ?? NetworkError.invalidRequest(error: nil)
     }
 }

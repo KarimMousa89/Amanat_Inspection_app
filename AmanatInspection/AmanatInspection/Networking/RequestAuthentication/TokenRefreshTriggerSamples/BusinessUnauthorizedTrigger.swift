@@ -9,14 +9,15 @@ import Foundation
 
 struct BusinessUnauthorizedTrigger: TokenRefreshTrigger {
     func shouldRefresh(
+        attempt: Int,
         error: NetworkError?,
         response: HTTPURLResponse?,
         data: Data?
-    ) -> Bool {
+    ) -> (Bool, Bool)  {
         guard let data,
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else { return false }
+        else { return (false, true) }
 
-        return json["status"] as? String == "User is not authorized"
+        return (json["status"] as? String == "User is not authorized", true)
     }
 }

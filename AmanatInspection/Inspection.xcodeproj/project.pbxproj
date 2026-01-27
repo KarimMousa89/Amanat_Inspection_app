@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		A37442702E43DB1C0090CE7D /* AmanatInspection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AmanatInspection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A37442702E43DB1C0090CE7D /* Inspection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Inspection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +40,7 @@
 		A37442712E43DB1C0090CE7D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A37442702E43DB1C0090CE7D /* AmanatInspection.app */,
+				A37442702E43DB1C0090CE7D /* Inspection.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A374426F2E43DB1C0090CE7D /* AmanatInspection */ = {
+		A374426F2E43DB1C0090CE7D /* Inspection */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A374427B2E43DB1D0090CE7D /* Build configuration list for PBXNativeTarget "AmanatInspection" */;
+			buildConfigurationList = A374427B2E43DB1D0090CE7D /* Build configuration list for PBXNativeTarget "Inspection" */;
 			buildPhases = (
 				A374426C2E43DB1C0090CE7D /* Sources */,
 				A374426D2E43DB1C0090CE7D /* Frameworks */,
@@ -64,11 +64,11 @@
 			fileSystemSynchronizedGroups = (
 				A37442722E43DB1C0090CE7D /* AmanatInspection */,
 			);
-			name = AmanatInspection;
+			name = Inspection;
 			packageProductDependencies = (
 			);
 			productName = AmanatInspection;
-			productReference = A37442702E43DB1C0090CE7D /* AmanatInspection.app */;
+			productReference = A37442702E43DB1C0090CE7D /* Inspection.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -86,7 +86,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A374426B2E43DB1C0090CE7D /* Build configuration list for PBXProject "AmanatInspection" */;
+			buildConfigurationList = A374426B2E43DB1C0090CE7D /* Build configuration list for PBXProject "Inspection" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -103,7 +103,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A374426F2E43DB1C0090CE7D /* AmanatInspection */,
+				A374426F2E43DB1C0090CE7D /* Inspection */,
 			);
 		};
 /* End PBXProject section */
@@ -340,7 +340,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A374426B2E43DB1C0090CE7D /* Build configuration list for PBXProject "AmanatInspection" */ = {
+		A374426B2E43DB1C0090CE7D /* Build configuration list for PBXProject "Inspection" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A37442792E43DB1D0090CE7D /* Debug */,
@@ -349,7 +349,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A374427B2E43DB1D0090CE7D /* Build configuration list for PBXNativeTarget "AmanatInspection" */ = {
+		A374427B2E43DB1D0090CE7D /* Build configuration list for PBXNativeTarget "Inspection" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A374427C2E43DB1D0090CE7D /* Debug */,

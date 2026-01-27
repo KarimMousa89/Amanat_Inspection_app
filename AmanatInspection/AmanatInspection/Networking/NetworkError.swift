@@ -8,12 +8,11 @@
 import Foundation
 
 enum NetworkError: Error {
-    case invalidURL
-    case authGenerationFailure(error: Error?)
-    case invalidResponse
-    case invalidResponseStatus(response: HTTPURLResponse, data: Data?)
-    case invalidData
-    case decodingFailure(error: Error)
-    case sslPinningFailure
-    case transportFailure(error: Error)//.. couldn't reach the server
+    case invalidRequest(error: Error?)
+    case invalidResponse(httpCode: Int?, response: HTTPURLResponse?, data: Data?, error: Error?) // Most probably Underlying Error is DecodingError
+    case noInternetConnection
+    case noDataFound
+    case requestTimeout
+    case autherizationFailed
+    case transportFailure(error: Error)//.. couldn't reach the server, SSL pinning issue, Most probably Underlying Error is URLError
 }

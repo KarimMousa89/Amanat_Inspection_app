@@ -14,34 +14,69 @@ enum NetworkRequestMethod: String {
     case delete = "DELETE"
 }
 
-struct NetworkRequest: Sendable {
-    var urlString: String
-    var method: NetworkRequestMethod
-    var timeoutInterval: TimeInterval = 10
-    var headers: [String: String]?
-    var body: Data?
-    var queryParams: [String: String]?
-    var retryPolicy: RetryPolicy?
-    var authorizationGroup: AuthorizationGroup?
-    let serverTrustEvaluator: ServerTrustEvaluating?
+protocol NetworkRequest: Sendable {
+    var urlString: String? { get }
+    var method: NetworkRequestMethod { get }
+    var timeoutInterval: TimeInterval { get }
+    var headers: [String: String]? { get}
+    var bodyAsJson: [String: Any]? { get }
+    var bodyAsData: Data?{ get }
+    var queryParams: [String: String]? { get }
+    var retryPolicy: RetryPolicy? { get }
+    var authorizationGroup: AuthorizationGroup? { get }
+    var serverTrustEvaluator: ServerTrustEvaluating? { get }
     
-    init(urlString: String,
-         method: NetworkRequestMethod,
-         timeoutInterval: TimeInterval = 10,
-         headers: [String: String]? = nil,
-         body: Data? = nil,
-         queryParams: [String: String]? = nil,
-         retryPolicy: RetryPolicy? = nil,
-         authorizationGroup: AuthorizationGroup? = nil,
-         serverTrustEvaluator: ServerTrustEvaluating? = nil) {
-        self.urlString = urlString
-        self.method = method
-        self.headers = headers
-        self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.queryParams = queryParams
-        self.retryPolicy = retryPolicy
-        self.authorizationGroup = authorizationGroup
-        self.serverTrustEvaluator = serverTrustEvaluator
+    func buildURLRequest() async throws(NetworkError) -> URLRequest
+}
+
+extension NetworkRequest {
+    var timeoutInterval: TimeInterval { 10 }
+    
+    func buildURLRequest() async throws(NetworkError) -> URLRequest {
+        guard let urlString = urlString,
+              var components = URLComponents(string: urlString) else {
+            throw NetworkError.invalidRequest(error: nil)
+        }
+        /// queryParams
+        if let queryParams = queryParams, !queryParams.isEmpty {
+            components.queryItems = queryParams.map {
+                URLQueryItem(name: $0.key, value: $0.value)
+            }
+        }
+        guard let url = components.url else {
+            throw NetworkError.invalidRequest(error: nil)
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = method.rawValue
+        /// Headers
+        if let headers = headers {
+            urlRequest.allHTTPHeaderFields = headers
+        }
+        /// Body
+        if let bodyAsData = bodyAsData {
+            urlRequest.httpBody = bodyAsData
+        } else if let bodyAsJson = bodyAsJson {
+            do {
+                let data = try JSONSerialization.data(withJSONObject: bodyAsJson, options: [])
+                urlRequest.httpBody = data
+            } catch {
+                print("Error Body serializing JSON: \(error)")
+                throw NetworkError.invalidRequest(error: nil)
+            }
+        }
+        
+        urlRequest.timeoutInterval = timeoutInterval
+        urlRequest.cachePolicy = .reloadIgnoringLocalCacheData
+        
+        if let auth = authorizationGroup?.authenticator {
+            do{
+                try await auth.apply(to: &urlRequest)
+            } catch {
+                throw NetworkError.invalidRequest(error: error)
+            }
+        }
+        
+        return urlRequest
     }
 }

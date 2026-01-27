@@ -20,6 +20,7 @@ enum ContentConsideration {
 
 protocol RetryPolicy: Sendable {
     var contentBased: Bool { get }
+    /// MAX RETRIES SHOULD BE GREATER THAN 1, 1 COULD BE CONSUMED IF THE TOKEN IS EXPIRED
     func shouldRetry(
         attempt: Int,
         error: NetworkError?,
